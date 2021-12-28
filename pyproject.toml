@@ -1,12 +1,25 @@
 [tool.poetry]
 name = "meta-tags-parser"
 version = "1.0.0"
-description = "Meta tags parser (with focus on the social tags)"
+description = "Fast, modern and strict meta tags parser (og, twitter, title, description, etc)"
 authors = ["Denis Anikin <ad@xfenix.ru>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/xfenix/meta-tags-parser/"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 packages = [
     { include = "meta_tags_parser" }
 ]
+
+[tool.poetry.urls]
+"Documentation" = "https://github.com/xfenix/meta-tags-parser"
 
 [tool.poetry.dependencies]
 python = "^3.8"
