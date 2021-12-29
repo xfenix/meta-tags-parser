@@ -1,11 +1,15 @@
 """Fixtures basically."""
+import pathlib
 import random
+import typing
 
 from meta_tags_parser.parse import structs
 
 import pytest
 
 
+FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"
+HTML_FIXTURES: typing.Final[tuple[str, ...]] = ("globo-com", "gazeta-ru")
 POSSIBLE_OG_TAGS_VALUES: tuple[str, ...] = (
     "title",
     "url",
@@ -20,6 +24,7 @@ POSSIBLE_OG_TAGS_VALUES: tuple[str, ...] = (
 
 @pytest.fixture
 def provide_fake_meta(faker):
+    """Basic random wannabe html generator of raw tags."""
     output_buffer: list = []
     control_result: list = []
     for one_name in structs.BASIC_META_TAGS:
@@ -35,7 +40,14 @@ def provide_fake_meta(faker):
             output_buffer.append(f"""<meta name="twitter:{one_name}" content="{tag_content}">""")
             control_result.append((one_name, tag_content))
     output_buffer.append(f"<title>{faker.text()}</title>")
+    output_buffer.append(f"""<meta name="article:{faker.name()}" content="{faker.text()}">""")
     return dict(control_result), ("\n \t" * random.randint(1, 5)).join(output_buffer)
+
+
+@pytest.fixture
+def provide_html_file_paths():
+    """File paths for raw parse test."""
+    return [FIXTURES_DIR.joinpath(f"{one_name}.html") for one_name in HTML_FIXTURES]
 
 
 __all__ = ["provide_fake_meta"]

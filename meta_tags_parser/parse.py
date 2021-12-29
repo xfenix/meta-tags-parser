@@ -12,12 +12,10 @@ TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile("(?:([^\s=\"']+)\s*=\s*(?:(?
 
 
 def _extract_social_tags_from_precusor(
-    all_tech_attrs: list[dict[str, structs.ValuesGroup]], media_type: int
+    all_tech_attrs: list[dict[str, structs.ValuesGroup]],
+    media_type: typing.Literal[structs.WhatToParse.OG, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
-    try:
-        possible_settings_for_parsing: dict[str, str] = structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
-    except KeyError as exc:
-        raise RuntimeError("Sorry, dont know this social media type") from exc
+    possible_settings_for_parsing: dict[str, str] = structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
         og_tag_name: str = ""
@@ -39,8 +37,10 @@ def _extract_basic_tags_from_precursor(
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
         tech_keys: KeysView[str] = one_attr_group.keys()
+
         if len(output_buffer) == len(structs.BASIC_META_TAGS):
             break
+
         for one_ordinary_meta_tag in structs.BASIC_META_TAGS:
             if (
                 "name" in tech_keys

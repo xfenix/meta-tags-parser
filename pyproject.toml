@@ -49,7 +49,7 @@ known_local_folder = []
 line-length = 120
 
 [tool.pytest.ini_options]
-addopts = "--cov . --cov-report term-missing"
+addopts = "-s --cov=meta_tags_parser --cov=tests --cov-report term-missing"
 
 [tool.pylint.format]
 max-line-length=120
