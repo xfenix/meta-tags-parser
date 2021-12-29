@@ -24,9 +24,11 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 httpx = "^0.21.1"
-aiofile = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+Faker = "^11.0.0"
+pytest-coverage = "^0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

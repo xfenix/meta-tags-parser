@@ -1,4 +1,5 @@
 """Main parsing module."""
+import typing
 from dataclasses import dataclass
 
 
@@ -35,13 +36,20 @@ class WhatToParse:
     BASIC: int = 1
     OG: int = 2
     TWITTER: int = 3
+    OTHER: int = 4
 
 
-DEFAULT_PARSE_GROUP: tuple[int, ...] = (
+BASIC_META_TAGS: typing.Final[tuple[str, ...]] = ("title", "description", "keywords", "robots", "viewport")
+SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[dict[int, dict[str, str]]] = {
+    WhatToParse.OG: {"prop": "property", "prefix": "og:"},
+    WhatToParse.TWITTER: {"prop": "name", "prefix": "twitter:"},
+}
+DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     WhatToParse.TITLE,
     WhatToParse.BASIC,
     WhatToParse.OG,
     WhatToParse.TWITTER,
+    WhatToParse.OTHER,
 )
 
 
