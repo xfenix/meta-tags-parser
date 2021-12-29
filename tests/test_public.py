@@ -5,6 +5,8 @@ import pytest
 
 
 def test_public_download(monkeypatch, provide_fake_meta):
+    """Public download test in integration manere."""
+
     class FakeHttpXObject:
         @property
         def text(self):
@@ -20,11 +22,13 @@ def test_public_download(monkeypatch, provide_fake_meta):
 
 @pytest.mark.asyncio
 async def test_async_public_download(monkeypatch, provide_fake_meta):
+    """Async download in unit style."""
+
     async def _fake_download(_):
         return provide_fake_meta[1]
 
     monkeypatch.setattr("meta_tags_parser.download.download_page_async", _fake_download)
-    result = await public.parse_tags_from_url_async("https://yandex.ru")
+    await public.parse_tags_from_url_async("https://yandex.ru")
 
 
 __all__ = ["test_public_download"]
