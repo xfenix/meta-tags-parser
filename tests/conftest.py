@@ -32,8 +32,10 @@ def provide_fake_meta(faker):
     for one_name in POSSIBLE_OG_TAGS_VALUES:
         for _ in range(random.randint(1, 5)):
             tag_content: str
-            if one_name in ("video", "image"):
+            if one_name == "url" or one_name == "video":
                 tag_content = faker.url()
+            elif one_name == "image":
+                tag_content = faker.image_url()
             else:
                 tag_content = faker.text()
             output_buffer.append(f"""<meta property="og:{one_name}" content="{tag_content}">""")

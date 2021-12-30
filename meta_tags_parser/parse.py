@@ -26,7 +26,7 @@ def _extract_social_tags_from_precusor(
             og_tag_name = one_attr_group[possible_settings_for_parsing["prop"]].normalized.replace(
                 possible_settings_for_parsing["prefix"], ""
             )
-        if og_tag_name and "content" in tech_keys:
+        if og_tag_name and "content" in tech_keys and one_attr_group["content"].original:
             output_buffer.append(structs.OneMetaTag(name=og_tag_name, value=one_attr_group["content"].original))
     return output_buffer
 
@@ -46,6 +46,7 @@ def _extract_basic_tags_from_precursor(
                 "name" in tech_keys
                 and one_attr_group["name"].normalized == one_ordinary_meta_tag
                 and "content" in one_attr_group
+                and one_attr_group["content"].original
             ):
                 output_buffer.append(
                     structs.OneMetaTag(
@@ -76,12 +77,13 @@ def _extract_all_other_tags_from_precursor(
         if "name" in tech_keys:
             if one_attr_group["name"].normalized in structs.BASIC_META_TAGS:
                 continue
-            output_buffer.append(
-                structs.OneMetaTag(
-                    name=one_attr_group["name"].normalized,
-                    value=one_attr_group["content"].original,
+            if one_attr_group["content"].original:
+                output_buffer.append(
+                    structs.OneMetaTag(
+                        name=one_attr_group["name"].normalized,
+                        value=one_attr_group["content"].original,
+                    )
                 )
-            )
     return output_buffer
 
 
