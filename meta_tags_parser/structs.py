@@ -20,12 +20,13 @@ class ValuesGroup:
     normalized: str
 
 
+@dataclass
 class TagsGroup:
     """Return struct."""
 
     title: str = ""
     basic: list[OneMetaTag] = []
-    og: list[OneMetaTag] = []
+    open_graph: list[OneMetaTag] = []
     twitter: list[OneMetaTag] = []
     other: list[OneMetaTag] = []
 
@@ -35,20 +36,22 @@ class WhatToParse(enum.IntEnum):
 
     TITLE: int = 0
     BASIC: int = 1
-    OG: int = 2
+    OPEN_GRAPH: int = 2
     TWITTER: int = 3
     OTHER: int = 4
 
 
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = ("title", "description", "keywords", "robots", "viewport")
-SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[dict[typing.Literal[WhatToParse.OG, WhatToParse.TWITTER], dict[str, str]]] = {
-    WhatToParse.OG: {"prop": "property", "prefix": "og:"},
+SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
+    dict[typing.Literal[WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER], dict[str, str]]
+] = {
+    WhatToParse.OPEN_GRAPH: {"prop": "property", "prefix": "og:"},
     WhatToParse.TWITTER: {"prop": "name", "prefix": "twitter:"},
 }
 DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     WhatToParse.TITLE,
     WhatToParse.BASIC,
-    WhatToParse.OG,
+    WhatToParse.OPEN_GRAPH,
     WhatToParse.TWITTER,
     WhatToParse.OTHER,
 )

@@ -1,7 +1,7 @@
 """Test through public interfaces, e.g. main tests here."""
-from meta_tags_parser import parse_meta_tags_from_source, structs
-
 import pytest
+
+from meta_tags_parser import parse_meta_tags_from_source, structs
 
 
 @pytest.mark.parametrize("_", range(5))

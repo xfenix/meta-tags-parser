@@ -6,14 +6,14 @@ from collections.abc import KeysView
 from . import structs
 
 
-TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile("<title>\s*(.*?)\s*</title>")
-META_TAGS_RE: typing.Final[re.Pattern] = re.compile("<meta([^>]*)>")
-TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile("(?:([^\s=\"']+)\s*=\s*(?:(?:[\"'](.*?)[\"'])|[^\s\"']*))")
+TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile(r"<title>\s*(.*?)\s*</title>")
+META_TAGS_RE: typing.Final[re.Pattern] = re.compile(r"<meta([^>]*)>")
+TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile(r"(?:([^\s=\"']+)\s*=\s*(?:(?:[\"'](.*?)[\"'])|[^\s\"']*))")
 
 
 def _extract_social_tags_from_precusor(
     all_tech_attrs: list[dict[str, structs.ValuesGroup]],
-    media_type: typing.Literal[structs.WhatToParse.OG, structs.WhatToParse.TWITTER],
+    media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
     possible_settings_for_parsing: dict[str, str] = structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     output_buffer: list[structs.OneMetaTag] = []
@@ -99,22 +99,24 @@ def parse_meta_tags_from_source(source_code: str, what_to_parse=structs.DEFAULT_
                 builded_result.title = str(possible_groups[0])
 
     if (
-        structs.WhatToParse.OG in what_to_parse
+        structs.WhatToParse.OPEN_GRAPH in what_to_parse
         or structs.WhatToParse.TWITTER in what_to_parse
         or structs.WhatToParse.BASIC in what_to_parse
         or structs.WhatToParse.OTHER in what_to_parse
     ):
         raw_tags_attrs: typing.Final[list] = META_TAGS_RE.findall(source_code)
         normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = []
-        for raw_tag_attrs in raw_tags_attrs:
+        for one_raw_attrs_row in raw_tags_attrs:
             prepared_attrs: dict = {}
-            for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(raw_tag_attrs)).items():
+            for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(one_raw_attrs_row)).items():
                 prepared_attrs[attr_key.lower().strip()] = structs.ValuesGroup(attr_value, attr_value.lower().strip())
             normalized_meta_attrs.append(prepared_attrs)
-        del raw_tag_attrs
+        del raw_tags_attrs
 
-        if structs.WhatToParse.OG in what_to_parse:
-            builded_result.og = _extract_social_tags_from_precusor(normalized_meta_attrs, structs.WhatToParse.OG)
+        if structs.WhatToParse.OPEN_GRAPH in what_to_parse:
+            builded_result.open_graph = _extract_social_tags_from_precusor(
+                normalized_meta_attrs, structs.WhatToParse.OPEN_GRAPH
+            )
 
         if structs.WhatToParse.TWITTER in what_to_parse:
             builded_result.twitter = _extract_social_tags_from_precusor(

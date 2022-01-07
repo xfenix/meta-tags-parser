@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install poetry
           poetry install
-      - name: Run linting
+      - name: Run pylint/mypy
         run: |
           poetry run pylint --fail-under 10.0 **/*.py
           poetry run mypy .

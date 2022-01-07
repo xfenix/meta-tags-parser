@@ -46,7 +46,7 @@ lexicographical = true
 sections = ["FUTURE", "STDLIB", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
 no_lines_before = ["STDLIB", "THIRDPARTY"]
 known_third_party = []
-known_local_folder = []
+known_local_folder = ["meta_tags_parser",]
 
 [tool.black]
 line-length = 120

@@ -3,9 +3,9 @@ import pathlib
 import random
 import typing
 
-from meta_tags_parser.parse import structs
-
 import pytest
+
+from meta_tags_parser.parse import structs
 
 
 FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"
@@ -32,7 +32,7 @@ def provide_fake_meta(faker):
     for one_name in POSSIBLE_OG_TAGS_VALUES:
         for _ in range(random.randint(1, 5)):
             tag_content: str
-            if one_name == "url" or one_name == "video":
+            if one_name in ("url", "video"):
                 tag_content = faker.url()
             elif one_name == "image":
                 tag_content = faker.image_url()

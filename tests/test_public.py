@@ -1,13 +1,16 @@
-"""There."""
-from meta_tags_parser import public
-
+"""Simple public interface tests."""
 import pytest
+
+from meta_tags_parser import public
 
 
 def test_public_download(monkeypatch, provide_fake_meta):
     """Public download test in integration manere."""
 
+    # pylint: disable=too-few-public-methods
     class FakeHttpXObject:
+        """Duck-typing mock."""
+
         @property
         def text(self):
             """Just faky fake.
