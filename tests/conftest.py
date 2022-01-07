@@ -51,6 +51,3 @@ def provide_fake_meta(faker):
 def provide_html_file_paths():
     """File paths for raw parse test."""
     return [FIXTURES_DIR.joinpath(f"{one_name}.html") for one_name in HTML_FIXTURES]
-
-
-__all__ = ["provide_fake_meta"]

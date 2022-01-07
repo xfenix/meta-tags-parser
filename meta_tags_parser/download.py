@@ -14,7 +14,4 @@ async def download_page_async(uri_of_page: str) -> str:
         return request_obj.text
 
 
-__all__ = [
-    'download_page_async',
-    'download_page_sync'
-]
+__all__ = ["download_page_async", "download_page_sync"]

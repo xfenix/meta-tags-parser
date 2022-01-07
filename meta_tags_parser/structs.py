@@ -1,11 +1,11 @@
 """Main parsing module."""
 from __future__ import annotations
+import dataclasses
 import enum
 import typing
-from dataclasses import dataclass
 
 
-@dataclass
+@dataclasses.dataclass
 class OneMetaTag:
     """Helper public tag wrapper."""
 
@@ -13,7 +13,7 @@ class OneMetaTag:
     value: str
 
 
-@dataclass
+@dataclasses.dataclass
 class ValuesGroup:
     """Helper inner wrapper."""
 
@@ -21,15 +21,15 @@ class ValuesGroup:
     normalized: str
 
 
-@dataclass
+@dataclasses.dataclass
 class TagsGroup:
     """Return struct."""
 
     title: str = ""
-    basic: list[OneMetaTag] = []
-    open_graph: list[OneMetaTag] = []
-    twitter: list[OneMetaTag] = []
-    other: list[OneMetaTag] = []
+    basic: list[OneMetaTag] = dataclasses.field(default_factory=list)
+    open_graph: list[OneMetaTag] = dataclasses.field(default_factory=list)
+    twitter: list[OneMetaTag] = dataclasses.field(default_factory=list)
+    other: list[OneMetaTag] = dataclasses.field(default_factory=list)
 
 
 class WhatToParse(enum.IntEnum):

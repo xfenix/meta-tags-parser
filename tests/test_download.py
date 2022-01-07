@@ -11,6 +11,3 @@ async def test_async_download(monkeypatch, faker):
     """Stupid test..."""
     monkeypatch.setattr("httpx.AsyncClient", AsyncMock)
     await download.download_page_async(faker.url())
-
-
-__all__ = ["test_async_download"]

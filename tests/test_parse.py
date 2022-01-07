@@ -18,6 +18,3 @@ def test_parse_from_file(provide_html_file_paths):
     """File based static tests of main parsing."""
     for one_file in provide_html_file_paths:
         parse_meta_tags_from_source(one_file.read_text())
-
-
-__all__ = ["test_parse_from_file", "test_parse_from_memory"]

@@ -32,6 +32,3 @@ async def test_async_public_download(monkeypatch, provide_fake_meta):
 
     monkeypatch.setattr("meta_tags_parser.download.download_page_async", _fake_download)
     await public.parse_tags_from_url_async("https://yandex.ru")
-
-
-__all__ = ["test_public_download"]
