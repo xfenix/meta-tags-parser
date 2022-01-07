@@ -1,0 +1,67 @@
+name: Test, lint, publish
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  run-tests-and-coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # check here https://github.com/actions/python-versions/releases
+        python-version: [3.8, 3.9, 3.10, 3.11]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Prepare
+        run: |
+          pip install poetry
+          poetry install
+      - name: Run linting
+        run: |
+          poetry run pylint --fail-under 10.0 **/*.py
+          poetry run mypy .
+      - name: Check building and run tests
+        run: |
+          poetry build
+          poetry run pytest -n2 ./ --cov=./ --cov-report=xml
+      - name: Upload code coverage to be accessed in next job
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: ./coverage.xml
+
+  upload-codecov:
+    runs-on: ubuntu-latest
+    needs: run-tests-and-coverage
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage
+      - uses: codecov/codecov-action@v2
+        name: Upload coverage to Codecov
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  # publish-pypi:
+  #   needs: upload-codecov
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.9
+  #     - name: Publish package
+  #       continue-on-error: true
+  #       run: |
+  #         pip install poetry
+  #         poetry publish --build -u ${{ secrets.FLIT_USERNAME }} -p ${{ secrets.FLIT_PASSWORD }}
