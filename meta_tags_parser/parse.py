@@ -1,4 +1,5 @@
 """Main parsing module."""
+from __future__ import annotations
 import re
 import typing
 from collections.abc import KeysView

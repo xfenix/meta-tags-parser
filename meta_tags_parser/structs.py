@@ -1,4 +1,5 @@
 """Main parsing module."""
+from __future__ import annotations
 import enum
 import typing
 from dataclasses import dataclass
