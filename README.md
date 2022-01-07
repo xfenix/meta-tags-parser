@@ -1,5 +1,5 @@
 # Meta tags parser
-![Build and publish](https://github.com/xfenix/meta-tags-parser/workflows/Build%20and%20publish/badge.svg)
+[![Test, lint, publish](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml/badge.svg)](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/meta-tags-parser.svg)](https://badge.fury.io/py/meta-tags-parser)
 [![codecov](https://codecov.io/gh/xfenix/meta-tags-parser/branch/master/graph/badge.svg)](https://codecov.io/gh/xfenix/meta-tags-parser)
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
