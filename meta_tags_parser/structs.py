@@ -44,10 +44,12 @@ class WhatToParse(enum.IntEnum):
 
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = ("title", "description", "keywords", "robots", "viewport")
 SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
-    dict[typing.Literal[WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER], dict[str, str]]
+    dict[typing.Literal[WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER], dict[str, typing.Union[str, tuple]]]
 ] = {
-    WhatToParse.OPEN_GRAPH: {"prop": "property", "prefix": "og:"},
-    WhatToParse.TWITTER: {"prop": "name", "prefix": "twitter:"},
+    WhatToParse.OPEN_GRAPH: {"prop": ("property",), "prefix": "og:"},
+    # weird thing about twitter: it use name and property simultaneously
+    # i mean name is old format, property is new, but all currently accepted as i see at the moment
+    WhatToParse.TWITTER: {"prop": ("name", "property"), "prefix": "twitter:"},
 }
 DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     WhatToParse.TITLE,
@@ -56,6 +58,3 @@ DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     WhatToParse.TWITTER,
     WhatToParse.OTHER,
 )
-
-
-__all__ = ["WhatToParse", "OneMetaTag", "TagsGroup"]

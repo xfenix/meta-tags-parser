@@ -21,14 +21,14 @@ def _extract_social_tags_from_precusor(
     for one_attr_group in all_tech_attrs:
         og_tag_name: str = ""
         tech_keys: KeysView[str] = one_attr_group.keys()
-        if possible_settings_for_parsing["prop"] in tech_keys and one_attr_group[
-            possible_settings_for_parsing["prop"]
-        ].normalized.startswith(possible_settings_for_parsing["prefix"]):
-            og_tag_name = one_attr_group[possible_settings_for_parsing["prop"]].normalized.replace(
-                possible_settings_for_parsing["prefix"], ""
-            )
-        if og_tag_name and "content" in tech_keys and one_attr_group["content"].original:
-            output_buffer.append(structs.OneMetaTag(name=og_tag_name, value=one_attr_group["content"].original))
+        for attr_name in possible_settings_for_parsing["prop"]:
+            if attr_name in tech_keys and one_attr_group[attr_name].normalized.startswith(
+                possible_settings_for_parsing["prefix"]
+            ):
+                og_tag_name = one_attr_group[attr_name].normalized.replace(possible_settings_for_parsing["prefix"], "")
+            if og_tag_name and "content" in tech_keys and one_attr_group["content"].original:
+                output_buffer.append(structs.OneMetaTag(name=og_tag_name, value=one_attr_group["content"].original))
+                break
     return output_buffer
 
 
