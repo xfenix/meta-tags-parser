@@ -30,7 +30,7 @@ jobs:
       - name: Check building and run tests
         run: |
           poetry build
-          poetry run pytest -n2 ./ --cov=./ --cov-report=xml
+          poetry run pytest -n2 ./ --cov-report=xml
       - name: Upload code coverage to be accessed in next job
         uses: actions/upload-artifact@v2
         with:
