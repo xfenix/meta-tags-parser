@@ -16,7 +16,7 @@ def _extract_social_tags_from_precusor(
     all_tech_attrs: list[dict[str, structs.ValuesGroup]],
     media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
-    possible_settings_for_parsing: dict[str, str] = structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
+    possible_settings_for_parsing: dict[str, typing.Union[str, tuple]] = structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
         og_tag_name: str = ""
@@ -25,7 +25,9 @@ def _extract_social_tags_from_precusor(
             if attr_name in tech_keys and one_attr_group[attr_name].normalized.startswith(
                 possible_settings_for_parsing["prefix"]
             ):
-                og_tag_name = one_attr_group[attr_name].normalized.replace(possible_settings_for_parsing["prefix"], "")
+                og_tag_name = one_attr_group[attr_name].normalized.replace(
+                    str(possible_settings_for_parsing["prefix"]), ""
+                )
             if og_tag_name and "content" in tech_keys and one_attr_group["content"].original:
                 output_buffer.append(structs.OneMetaTag(name=og_tag_name, value=one_attr_group["content"].original))
                 break
