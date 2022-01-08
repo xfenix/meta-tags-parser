@@ -8,7 +8,7 @@ from meta_tags_parser import parse_meta_tags_from_source, structs
 def test_parse_from_memory(provide_fake_meta, _):
     """Random based tests of main parsing."""
     result: structs.TagsGroup = parse_meta_tags_from_source(provide_fake_meta[1])
-    for one_tag in result.og:
+    for one_tag in result.open_graph:
         assert one_tag.name in provide_fake_meta[0].keys()
         print(one_tag)
         # assert one_tag.value not in provide_fake_meta[0].values()
