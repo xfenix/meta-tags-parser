@@ -67,11 +67,10 @@ def _extract_all_other_tags_from_precursor(
 
         should_we_skip: bool = False
         for one_config in structs.SETTINGS_FOR_SOCIAL_MEDIA.values():
-            if one_config["prop"] in tech_keys and one_attr_group[one_config["prop"]].normalized.startswith(
-                one_config["prefix"]
-            ):
-                should_we_skip = True
-                break
+            for attr_name in one_config["prop"]:
+                if attr_name in tech_keys and one_attr_group[attr_name].normalized.startswith(one_config["prefix"]):
+                    should_we_skip = True
+                    break
         if should_we_skip:
             continue
 

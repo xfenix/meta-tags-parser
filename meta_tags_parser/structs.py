@@ -32,6 +32,24 @@ class TagsGroup:
     other: list[OneMetaTag] = dataclasses.field(default_factory=list)
 
 
+@dataclasses.dataclass
+class SocialMediaSnippet:
+    """Social media snippet group."""
+
+    title: str = ""
+    description: str = ""
+    image: str = ""
+    url: str = ""
+
+
+@dataclasses.dataclass
+class SnippetGroup:
+    """Groupping for social media."""
+
+    open_graph: SocialMediaSnippet = SocialMediaSnippet()
+    twitter: SocialMediaSnippet = SocialMediaSnippet()
+
+
 class WhatToParse(enum.IntEnum):
     """Enum for parsing configuration."""
 
@@ -58,3 +76,5 @@ DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     WhatToParse.TWITTER,
     WhatToParse.OTHER,
 )
+SOCIAL_MEDIA_SNIPPET_GROUPS: tuple[str, str] = ("twitter", "open_graph")
+SOCIAL_MEDIA_SNIPPET_WHAT_ATTRS_TO_COPY: tuple[str, ...] = ("title", "description", "url", "image")
