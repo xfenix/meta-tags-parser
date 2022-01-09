@@ -9,11 +9,14 @@ Fast, modern, pure python meta tags parser and snippet creator with full support
 If you want to see what exactly is social media snippets, look at the example:
 ![](https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/social-media-snippets.png)
 
-# Install
+## Requirements
+* Python 3.8+
+* [Httpx](https://www.python-httpx.org/)
+
+## Install
 `pip install meta-tags-parser`
 
-# Usage
-
+## Usage
 ### TL:DR
 * Parse meta tags from source:
     ```python
@@ -163,9 +166,20 @@ for one_tag in my_result.twitter:
 Hello, my friend
 """
 ```
-So...
 
-### Important notes
+### If you want to improve speed
+You can specify what you want to parse:
+```python
+from meta_tags_parser import parse_meta_tags_from_source, structs
+
+
+result: structs.TagsGroup = parse_meta_tags_from_source("""... source ...""",
+    what_to_parse=(WhatToParse.TITLE, WhatToParse.BASIC, WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER, WhatToParse.OTHER)
+)
+```
+If you reduce this tuple of parsing requirements it may increase overall parsing speed.
+
+## Important notes
 * Any name in meta tag (name or property attribute) will be lowercased
 * I decided to strip `og:` and `twitter:` from original attributes, and let dataclass structures carry this information. So if parse meta tag `og:name` in `my_result` variable it will be available as one element of list `my_result.open_graph`
 * Title of page (e.g. `<title>Something</title>`) will be available as string `my_result.title`
