@@ -43,7 +43,8 @@ def provide_fake_meta(faker):
             output_buffer.append(f"""<meta name="twitter:{one_name}" content="{tag_content}">""")
             control_result.append((one_name, tag_content))
     output_buffer.append(f"<title>{faker.text()}</title>")
-    output_buffer.append(f"""<meta name="article:{faker.name()}" content="{faker.text()}">""")
+    output_buffer.append(f"""<meta name="article:name" content="{faker.text()}">""")
+    output_buffer.append(f"""<meta name="article:description" content="{faker.text()}">""")
     return dict(control_result), ("\n \t" * random.randint(1, 5)).join(output_buffer)
 
 
