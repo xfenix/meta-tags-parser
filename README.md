@@ -5,7 +5,9 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 [![Imports: isort](https://img.shields.io/badge/imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://timothycrosley.github.io/isort/)
 
-...
+Fast, modern, pure python meta tags parser and snippet creator with full support of type annotations, py.typed in basic package and structured output. No jelly dicts, only typed structures!  
+If you want to see what exactly is social media snippets, look at the example:
+![](./social-media-snippets.png)
 
 # Install
 `pip install meta-tags-parser`
