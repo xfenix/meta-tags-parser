@@ -8,7 +8,7 @@
 ...
 
 # Install
-`pip install ...`
+`pip install meta-tags-parser`
 
 # Changelog
 You can check https://github.com/xfenix/meta-tags-parser/releases/ release page.

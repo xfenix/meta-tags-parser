@@ -3,6 +3,8 @@ from meta_tags_parser import parse_meta_tags_from_source, parse_snippets_from_so
 
 
 class TestCaseWithMultilineTags:
+    """Basic cases with static multiline fixture."""
+
     FIXTURE_FOR_CASE: str = """
     <!DOCTYPE html>
     <html lang="en">
@@ -121,18 +123,18 @@ def test_general_with_file_fixtures(provide_html_file_paths):
 
 def test_parsing_any_twitter_tag():
     """Test case with name and property attrs for twitter."""
-    EXAMPLE_FIXTURE_WITH_NAME: str = """
+    example_fixture_with_name: str = """
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://github.com/">
     <meta name="twitter:title" content="Hello, my friend">
     <meta name="twitter:description" content="Content here, yehehe">
     """
-    EXAMPLE_FIXTURE_WITH_PROPERTY: str = """
+    example_fixture_with_property: str = """
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://github.com/">
     <meta property="twitter:title" content="Hello, my friend">
     <meta property="twitter:description" content="Content here, yehehe">
     """
-    for one_fixture in (EXAMPLE_FIXTURE_WITH_NAME, EXAMPLE_FIXTURE_WITH_PROPERTY):
+    for one_fixture in (example_fixture_with_name, example_fixture_with_property):
         parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_fixture)
         assert len(parse_result.twitter) == 4
