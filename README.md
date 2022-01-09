@@ -7,7 +7,7 @@
 
 Fast, modern, pure python meta tags parser and snippet creator with full support of type annotations, py.typed in basic package and structured output. No jelly dicts, only typed structures!  
 If you want to see what exactly is social media snippets, look at the example:
-![](./social-media-snippets.png)
+![](https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/social-media-snippets.png)
 
 # Install
 `pip install meta-tags-parser`
@@ -15,24 +15,34 @@ If you want to see what exactly is social media snippets, look at the example:
 # Usage
 
 ### TL:DR
-Parse meta tags:
-```python
-from meta_tags_parser import parse_meta_tags_from_source, structs
+* Parse meta tags from source:
+    ```python
+    from meta_tags_parser import parse_meta_tags_from_source, structs
 
 
-desired_result: structs.TagsGroup = parse_meta_tags_from_source("""... html source ...""")
-# desired_result — is what you want
-```
+    desired_result: structs.TagsGroup = parse_meta_tags_from_source("""... html source ...""")
+    # desired_result — is what you want
+    ```
+* Parse social media snippet from source:
+    ```python
+    from meta_tags_parser import parse_snippets_from_source, structs
 
-Parse social media snippet:
-```python
-from meta_tags_parser import parse_snippets_from_source, structs
+
+    snippet_obj: structs.SnippetGroup = parse_snippets_from_source("""... html source ...""")
+    # snippet_obj — is what you want
+    # access like snippet_obj.open_graph.title, ...
+    ```
+* Parse meta tags from url:
+    ```python
+    from meta_tags_parser import parse_tags_from_url, parse_tags_from_url_async, structs
 
 
-snippet_obj: structs.SnippetGroup = parse_snippets_from_source("""... html source ...""")
-# snippet_obj — is what you want
-# access like snippet_obj.open_graph.title, ...
-```
+    desired_result: structs.TagsGroup = parse_tags_from_url("https://xfenix.ru")
+    # and async variant
+    desired_result: structs.TagsGroup = await parse_tags_from_url_async("https://xfenix.ru")
+    # desired_result — is what you want for both cases
+    ```
+    Huge note: this functions super stupid and really error prone. I write this only for convenience
 
 
 ### Basic snippets parsing
