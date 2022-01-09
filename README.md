@@ -10,5 +10,157 @@
 # Install
 `pip install meta-tags-parser`
 
+# Usage
+
+### TL:DR
+Parse meta tags:
+```python
+from meta_tags_parser import parse_meta_tags_from_source, structs
+
+
+desired_result: structs.TagsGroup = parse_meta_tags_from_source("""... html source ...""")
+# desired_result — is what you want
+```
+
+Parse social media snippet:
+```python
+from meta_tags_parser import parse_snippets_from_source, structs
+
+
+snippet_obj: structs.SnippetGroup = parse_snippets_from_source("""... html source ...""")
+# snippet_obj — is what you want
+# access like snippet_obj.open_graph.title, ...
+```
+
+
+### Basic snippets parsing
+Lets say you want extract snippet for twitter from html page:
+```python
+from meta_tags_parser import parse_snippets_from_source, structs
+
+
+my_result: structs.TagsGroup = parse_snippets_from_source("""
+    <meta property="og:card" content="summary_large_image">
+    <meta property="og:url" content="https://github.com/">
+    <meta property="og:title" content="Hello, my friend">
+    <meta property="og:description" content="Content here, yehehe">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://github.com/">
+    <meta property="twitter:title" content="Hello, my friend">
+    <meta property="twitter:description" content="Content here, yehehe">
+""")
+
+print(my_result)
+# What will be printed:
+"""
+SnippetGroup(
+    open_graph=SocialMediaSnippet(
+        title='Hello, my friend',
+        description='Content here, yehehe',
+        image='',
+        url='https://github.com/'
+    ),
+    twitter=SocialMediaSnippet(
+        title='Hello, my friend',
+        description='Content here, yehehe',
+        image='',
+        url='https://github.com/'
+    )
+)
+"""
+# You can access attributes as this
+my_result.open_graph.title
+my_result.twitter.image
+```
+
+### Basic meta tags parsing
+Main function is `parse_meta_tags_from_source`. It can be used like this:
+```python
+from meta_tags_parser import parse_meta_tags_from_source, structs
+
+
+my_result: structs.TagsGroup = parse_meta_tags_from_source("""... html source ...""")
+print(my_result)
+
+# What will be printed:
+"""
+structs.TagsGroup(
+    title="...",
+    twitter=[
+        structs.OneMetaTag(
+            name="title", value="Hello",
+            ...
+        )
+    ],
+    open_graph=[
+        structs.OneMetaTag(
+            name="title", value="Hello",
+            ...
+        )
+    ],
+    basic=[
+        structs.OneMetaTag(
+            name="title", value="Hello",
+            ...
+        )
+    ],
+    other=[
+        structs.OneMetaTag(
+            name="article:name", value="Hello",
+            ...
+        )
+    ]
+)
+"""
+```
+As you can see from this example, we are not using any jelly dicts, only structured dataclasses. Lets see another example:
+
+```python
+from meta_tags_parser import parse_meta_tags_from_source, structs
+
+
+my_result: structs.TagsGroup = parse_meta_tags_from_source("""
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://github.com/">
+    <meta property="twitter:title" content="Hello, my friend">
+    <meta property="twitter:description" content="Content here, yehehe">
+""")
+
+print(my_result)
+# What will be printed:
+"""
+TagsGroup(
+    title='',
+    basic=[],
+    open_graph=[],
+    twitter=[
+        OneMetaTag(name='card', value='summary_large_image'),
+        OneMetaTag(name='url', value='https://github.com/'),
+        OneMetaTag(name='title', value='Hello, my friend'),
+        OneMetaTag(name='description', value='Content here, yehehe')
+    ],
+    other=[]
+)
+"""
+
+for one_tag in my_result.twitter:
+    if one_tag.name == "title":
+        print(one_tag.value)
+# What will be printed:
+"""
+Hello, my friend
+"""
+```
+So...
+
+### Important notes
+* Any name in meta tag (name or property attribute) will be lowercased
+* I decided to strip `og:` and `twitter:` from original attributes, and let dataclass structures carry this information. So if parse meta tag `og:name` in `my_result` variable it will be available as one element of list `my_result.open_graph`
+* Title of page (e.g. `<title>Something</title>`) will be available as string `my_result.title`
+* «Standart» tags like title, description (check full list here [./meta_tags_parser/structs.py](./meta_tags_parser/structs.py) in constant `BASIC_META_TAGS`) will be available as list in `my_result.basic`
+* Other tags will be available as list in `my_result.other` attribute, name of tags will be preserved, unlike `og:`/`twitter:` behaviour
+* If you want structured snippets, use `parse_snippets_from_source` function
+
+
 # Changelog
 You can check https://github.com/xfenix/meta-tags-parser/releases/ release page.

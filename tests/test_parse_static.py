@@ -137,4 +137,5 @@ def test_parsing_any_twitter_tag():
     """
     for one_fixture in (example_fixture_with_name, example_fixture_with_property):
         parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_fixture)
+        print(parse_result)
         assert len(parse_result.twitter) == 4
