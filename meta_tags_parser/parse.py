@@ -7,9 +7,12 @@ from collections.abc import KeysView
 from . import structs
 
 
-TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile(r"<title>\s*(.*?)\s*</title>")
-META_TAGS_RE: typing.Final[re.Pattern] = re.compile(r"<meta([^>]*)>")
-TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile(r"(?:([^\s=\"']+)\s*=\s*(?:(?:[\"'](.*?)[\"'])|[^\s\"']*))")
+_RE_FLAGS: re.RegexFlag = re.I | re.M | re.S
+TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile(r"<title>\s*(.*?)\s*</title>", flags=_RE_FLAGS)
+META_TAGS_RE: typing.Final[re.Pattern] = re.compile(r"<meta([^>]*)>", flags=_RE_FLAGS)
+TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile(
+    r"(?:([^\s=\"']+)\s*=\s*(?:(?:[\"'](.*?)[\"'])|[^\s\"']*))", flags=_RE_FLAGS
+)
 
 
 def _extract_social_tags_from_precusor(
