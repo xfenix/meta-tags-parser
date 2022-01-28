@@ -3,7 +3,12 @@ from .parse import parse_meta_tags_from_source, structs
 
 
 def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
-    """Parse snippets from source code."""
+    """Parse snippets from source code.
+
+    This function use «ugly» magic like getattr, setattr.
+    This is sad, but i don't find at the bottom of my mind a better solution at the moment.
+    If you have a more reasonable solution — feel free to push me, I will be grateful for any advice.
+    """
     tags_groups: structs.TagsGroup = parse_meta_tags_from_source(
         source_code, (structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER)
     )

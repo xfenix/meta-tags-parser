@@ -21,6 +21,7 @@ def test_public_download(monkeypatch, provide_fake_meta):
 
     monkeypatch.setattr("httpx.get", lambda _: FakeHttpXObject())
     public.parse_tags_from_url("https://yandex.ru")
+    public.parse_snippets_from_url("https://yandex.ru")
 
 
 @pytest.mark.asyncio
@@ -32,3 +33,4 @@ async def test_async_public_download(monkeypatch, provide_fake_meta):
 
     monkeypatch.setattr("meta_tags_parser.download.download_page_async", _fake_download)
     await public.parse_tags_from_url_async("https://yandex.ru")
+    await public.parse_snippets_from_url_async("https://yandex.ru")

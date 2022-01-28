@@ -18,7 +18,7 @@ If you want to see what exactly is social media snippets, look at the example:
 
 ## Usage
 ### TL:DR
-* Parse meta tags from source:
+1. Parse meta tags from source:
     ```python
     from meta_tags_parser import parse_meta_tags_from_source, structs
 
@@ -26,16 +26,7 @@ If you want to see what exactly is social media snippets, look at the example:
     desired_result: structs.TagsGroup = parse_meta_tags_from_source("""... html source ...""")
     # desired_result — is what you want
     ```
-* Parse social media snippet from source:
-    ```python
-    from meta_tags_parser import parse_snippets_from_source, structs
-
-
-    snippet_obj: structs.SnippetGroup = parse_snippets_from_source("""... html source ...""")
-    # snippet_obj — is what you want
-    # access like snippet_obj.open_graph.title, ...
-    ```
-* Parse meta tags from url:
+1. Parse meta tags from url:
     ```python
     from meta_tags_parser import parse_tags_from_url, parse_tags_from_url_async, structs
 
@@ -45,8 +36,29 @@ If you want to see what exactly is social media snippets, look at the example:
     desired_result: structs.TagsGroup = await parse_tags_from_url_async("https://xfenix.ru")
     # desired_result — is what you want for both cases
     ```
-    Huge note: this functions super stupid and really error prone. I write this only for convenience
+1. Parse social media snippet from source:
+    ```python
+    from meta_tags_parser import parse_snippets_from_source, structs
 
+
+    snippet_obj: structs.SnippetGroup = parse_snippets_from_source("""... html source ...""")
+    # snippet_obj — is what you want
+    # access like snippet_obj.open_graph.title, ...
+    ```
+1. Parse social media snippet from url:
+    ```python
+    from meta_tags_parser import parse_snippets_from_url, parse_snippets_from_url_async, structs
+
+
+    snippet_obj: structs.SnippetGroup = parse_snippets_from_url("https://xfenix.ru")
+    # and async variant
+    snippet_obj: structs.SnippetGroup = await parse_snippets_from_url_async("https://xfenix.ru")
+    # snippet_obj — is what you want
+    # access like snippet_obj.open_graph.title, ...
+    ```
+
+**Huge note**: functions `*_from_url` written only for convenience and very error-prone, so any reconnections/error handling — completely on your side.  
+Also, I don't want to add some bloated requirements to achieve robust connections for any users, because they may simply not await any of this from the library. But if you really need this — write me.
 
 ### Basic snippets parsing
 Lets say you want extract snippet for twitter from html page:
@@ -183,8 +195,8 @@ If you reduce this tuple of parsing requirements it may increase overall parsing
 
 ## Important notes
 * Any name in meta tag (name or property attribute) will be lowercased
-* I decided to strip `og:` and `twitter:` from original attributes, and let dataclass structures carry this information. So if parse meta tag `og:name` in `my_result` variable it will be available as one element of list `my_result.open_graph`
-* Title of page (e.g. `<title>Something</title>`) will be available as string `my_result.title`
+* I decided to strip `og:` and `twitter:` from original attributes, and let dataclass structures carry this information. If parser met meta tag with property `og:name`, it will be available in `my_result` variable as one element of list `my_result.open_graph`
+* Title of page (e.g. `<title>Something</title>`) will be available as string `my_result.title` (of course, you recieve `Something`)
 * «Standart» tags like title, description (check full list here [./meta_tags_parser/structs.py](./meta_tags_parser/structs.py) in constant `BASIC_META_TAGS`) will be available as list in `my_result.basic`
 * Other tags will be available as list in `my_result.other` attribute, name of tags will be preserved, unlike `og:`/`twitter:` behaviour
 * If you want structured snippets, use `parse_snippets_from_source` function
