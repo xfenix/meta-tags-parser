@@ -6,7 +6,7 @@ import typing
 
 import pytest
 
-from meta_tags_parser.parse import structs
+from meta_tags_parser import settings
 
 
 FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"
@@ -28,7 +28,7 @@ def provide_fake_meta(faker):
     """Basic random wannabe html generator of raw tags."""
     output_buffer: list = []
     control_result: list = []
-    for one_name in structs.BASIC_META_TAGS:
+    for one_name in settings.BASIC_META_TAGS:
         output_buffer.append(f"""<meta name="{one_name}" content="{faker.text()}">""")
     for one_name in POSSIBLE_OG_TAGS_VALUES:
         for _ in range(random.randint(1, 5)):

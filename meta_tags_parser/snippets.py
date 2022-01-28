@@ -1,5 +1,5 @@
 """Snippets helper functions."""
-from .parse import parse_meta_tags_from_source, structs
+from .parse import parse_meta_tags_from_source, settings, structs
 
 
 def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
@@ -15,11 +15,13 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
     prepared_result: structs.SnippetGroup = structs.SnippetGroup()
     sm_group: str
     one_tag: structs.OneMetaTag
-    for sm_group in structs.SOCIAL_MEDIA_SNIPPET_GROUPS:
+    for sm_group in settings.SOCIAL_MEDIA_SNIPPET_GROUPS:
         prepared_snippet: structs.SocialMediaSnippet = getattr(prepared_result, sm_group)
         for one_tag in getattr(tags_groups, sm_group):
-            if one_tag.name in structs.SOCIAL_MEDIA_SNIPPET_WHAT_ATTRS_TO_COPY:
-                setattr(prepared_snippet, one_tag.name, one_tag.value)
+            if one_tag.name in settings.SOCIAL_MEDIA_SNIPPET_WHAT_ATTRS_TO_COPY:
+                # any attrs like "image:width" will be converted to
+                # underscored versions, like this — "image_width"
+                setattr(prepared_snippet, one_tag.name.replace(":", "_"), one_tag.value)
     return prepared_result
 
 
