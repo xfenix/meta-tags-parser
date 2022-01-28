@@ -86,6 +86,8 @@ SnippetGroup(
 # You can access attributes as this
 my_result.open_graph.title
 my_result.twitter.image
+# All fields are necessary and will be always available, even if they have not contain data
+# So no need to worry about attributes exsitence (but you may need to check values)
 ```
 
 ### Basic meta tags parsing
