@@ -14,6 +14,7 @@ class TestCaseWithMultilineTags:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
         <!-- Open Graph / Facebook -->
+        <meta name="single-tag-without-content">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://metatags.io/">
         <meta property="og:title" content="Meta Tags — Preview, Edit and Generate">

@@ -82,7 +82,7 @@ def _extract_all_other_tags_from_precursor(
         if "name" in tech_keys:
             if one_attr_group["name"].normalized in structs.BASIC_META_TAGS:
                 continue
-            if one_attr_group["content"].original:
+            if "content" in one_attr_group and one_attr_group["content"].original:
                 output_buffer.append(
                     structs.OneMetaTag(
                         name=one_attr_group["name"].normalized,

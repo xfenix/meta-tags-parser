@@ -45,6 +45,8 @@ def provide_fake_meta(faker):
     output_buffer.append(f"<title>{faker.text()}</title>")
     output_buffer.append(f"""<meta name="article:name" content="{faker.text()}">""")
     output_buffer.append(f"""<meta name="article:description" content="{faker.text()}">""")
+    output_buffer.append(f"""<meta name="bad-tag">""")
+    output_buffer.append(f"""<meta property="another-bad-tag">""")
     return dict(control_result), ("\n \t" * random.randint(1, 5)).join(output_buffer)
 
 
