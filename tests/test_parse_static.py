@@ -82,8 +82,8 @@ class TestCaseWithMultilineTags:
 
     def test_snippet_parsing_static(self):
         """Test snippet parsing."""
-        snippet_obj: structs.SnippetGroup = parse_snippets_from_source(self.FIXTURE_FOR_CASE)
-        assert snippet_obj == structs.SnippetGroup(
+        testable_object: structs.SnippetGroup
+        good_result: structs.SnippetGroup = structs.SnippetGroup(
             open_graph=structs.SocialMediaSnippet(
                 title="Meta Tags — Preview, Edit and Generate",
                 description=(
@@ -110,7 +110,17 @@ class TestCaseWithMultilineTags:
                 image="https://metatags.io/assets/hm-fail.png",
                 url="https://metatags.io/",
             ),
-        ), snippet_obj
+        )
+        # need parse multiple times in one session
+        for _ in range(3):
+            testable_object = parse_snippets_from_source(self.FIXTURE_FOR_CASE)
+            assert testable_object == good_result, testable_object
+
+        # fresh new "html"
+        testable_object = parse_snippets_from_source("""<meta name="twitter:title" content="Hi, whatsup kekeke">""")
+        assert testable_object.twitter.title == "Hi, whatsup kekeke"
+        assert testable_object.open_graph.title == ""
+        assert testable_object.open_graph.description == ""
 
 
 def test_general_with_file_fixtures(provide_html_file_paths):
