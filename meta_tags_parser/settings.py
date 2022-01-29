@@ -22,7 +22,6 @@ DEFAULT_PARSE_GROUP: typing.Final[tuple[int, ...]] = (
     structs.WhatToParse.TWITTER,
     structs.WhatToParse.OTHER,
 )
-SOCIAL_MEDIA_SNIPPET_GROUPS: typing.Final[tuple[str, str]] = ("twitter", "open_graph")
 SOCIAL_MEDIA_SNIPPET_WHAT_ATTRS_TO_COPY: typing.Final[tuple[str, ...]] = (
     "title",
     "description",
