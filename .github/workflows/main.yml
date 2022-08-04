@@ -58,7 +58,7 @@ jobs:
   publish-pypi:
     needs: upload-codecov
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
