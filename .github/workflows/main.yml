@@ -8,7 +8,7 @@ on:
       - "hotfix/**"
       - "bugfix/**"
     tags:
-      - *
+      - "*"
 
 jobs:
   run-tests-and-coverage:
