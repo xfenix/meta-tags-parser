@@ -3,7 +3,7 @@ name: Test, lint, publish
 on:
   push:
     branches:
-      - "main"
+      - "master"
       - "feature/**"
       - "hotfix/**"
       - "bugfix/**"
