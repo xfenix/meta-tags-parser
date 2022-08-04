@@ -2,9 +2,13 @@ name: Test, lint, publish
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches:
+      - "main"
+      - "feature/**"
+      - "hotfix/**"
+      - "bugfix/**"
+    tags:
+      - v*
 
 jobs:
   run-tests-and-coverage:
@@ -54,6 +58,7 @@ jobs:
   publish-pypi:
     needs: upload-codecov
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -64,4 +69,5 @@ jobs:
         continue-on-error: true
         run: |
           pip install poetry
+          poetry version ${GITHUB_REF_NAME/v/}
           poetry publish --build -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
