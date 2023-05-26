@@ -47,8 +47,8 @@ class SocialMediaSnippet:
 class SnippetGroup:
     """Groupping for social media."""
 
-    open_graph: SocialMediaSnippet = SocialMediaSnippet()
-    twitter: SocialMediaSnippet = SocialMediaSnippet()
+    open_graph: SocialMediaSnippet = dataclasses.field(default_factory=SocialMediaSnippet)
+    twitter: SocialMediaSnippet = dataclasses.field(default_factory=SocialMediaSnippet)
 
 
 class WhatToParse(enum.IntEnum):
