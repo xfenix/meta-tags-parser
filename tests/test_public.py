@@ -1,19 +1,23 @@
 """Simple public interface tests."""
+from __future__ import annotations
+
 import pytest
 
 from meta_tags_parser import public
 
 
-def test_public_download(monkeypatch, provide_fake_meta):
-    """Public download test in integration manere."""
+def test_public_download(
+    monkeypatch: pytest.MonkeyPatch, provide_fake_meta: tuple[dict[str, str], str]
+) -> None:
+    """Test download via public API."""
 
     # pylint: disable=too-few-public-methods
     class FakeHttpXObject:
-        """Duck-typing mock."""
+        """Provide duck-typing mock."""
 
         @property
-        def text(self):
-            """Just faky fake.
+        def text(self) -> str:
+            """Return fake text.
 
             Hello, duck-type
             """
@@ -25,10 +29,12 @@ def test_public_download(monkeypatch, provide_fake_meta):
 
 
 @pytest.mark.asyncio
-async def test_async_public_download(monkeypatch, provide_fake_meta):
-    """Async download in unit style."""
+async def test_async_public_download(
+    monkeypatch: pytest.MonkeyPatch, provide_fake_meta: tuple[dict[str, str], str]
+) -> None:
+    """Test async download via public API."""
 
-    async def _fake_download(_):
+    async def _fake_download(_: str) -> str:
         return provide_fake_meta[1]
 
     monkeypatch.setattr("meta_tags_parser.download.download_page_async", _fake_download)

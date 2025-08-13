@@ -54,8 +54,8 @@ class SnippetGroup:
 class WhatToParse(enum.IntEnum):
     """Enum for parsing configuration."""
 
-    TITLE: int = 0
-    BASIC: int = 1
-    OPEN_GRAPH: int = 2
-    TWITTER: int = 3
-    OTHER: int = 4
+    TITLE = 0
+    BASIC = 1
+    OPEN_GRAPH = 2
+    TWITTER = 3
+    OTHER = 4

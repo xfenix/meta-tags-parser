@@ -1,5 +1,15 @@
 """Test through public interfaces, e.g. main tests here."""
+from __future__ import annotations
+import typing
+
 from meta_tags_parser import parse_meta_tags_from_source, parse_snippets_from_source, structs
+
+
+if typing.TYPE_CHECKING:
+    import pathlib
+
+
+EXPECTED_TWITTER_TAGS_COUNT: typing.Final = 4
 
 
 class TestCaseWithMultilineTags:
@@ -37,8 +47,8 @@ class TestCaseWithMultilineTags:
     </html>
     """
 
-    def test_parse_good_static(self):
-        """Static based test but with more good asserts."""
+    def test_parse_good_static(self) -> None:
+        """Parse static content with more asserts."""
         positive_result: structs.TagsGroup = parse_meta_tags_from_source(self.FIXTURE_FOR_CASE)
 
         assert (
@@ -80,18 +90,16 @@ class TestCaseWithMultilineTags:
             in positive_result.twitter
         )
 
-    def test_snippet_parsing_static(self):
+    def test_snippet_parsing_static(self) -> None:
         """Test snippet parsing."""
         testable_object: structs.SnippetGroup
         good_result: structs.SnippetGroup = structs.SnippetGroup(
             open_graph=structs.SocialMediaSnippet(
                 title="Meta Tags — Preview, Edit and Generate",
                 description=(
-                    (
-                        "With Meta Tags you can edit and\n"
-                        "        experiment with your content then preview how your webpage will look on Google, "
-                        "Facebook, Twitter and more!"
-                    )
+                    "With Meta Tags you can edit and\n"
+                    "        experiment with your content then preview how your webpage will look on Google, "
+                    "Facebook, Twitter and more!"
                 ),
                 image=(
                     "https://metatags.io/assets/meta-tags-16a33a6a853"
@@ -102,10 +110,8 @@ class TestCaseWithMultilineTags:
             twitter=structs.SocialMediaSnippet(
                 title="Privet, kak dela to vcelom?",
                 description=(
-                    (
-                        "With Meta Tags you can edit and experiment with your content then preview\n"
-                        "        how your webpage will look on Google, Facebook, Twitter and more!"
-                    )
+                    "With Meta Tags you can edit and experiment with your content then preview\n"
+                    "        how your webpage will look on Google, Facebook, Twitter and more!"
                 ),
                 image="https://metatags.io/assets/hm-fail.png",
                 url="https://metatags.io/",
@@ -123,8 +129,10 @@ class TestCaseWithMultilineTags:
         assert testable_object.open_graph.description == ""
 
 
-def test_general_with_file_fixtures(provide_html_file_paths):
-    """File based static tests of main parsing."""
+def test_general_with_file_fixtures(
+    provide_html_file_paths: list[pathlib.Path],
+) -> None:
+    """Parse meta tags from file fixtures."""
     for one_file in provide_html_file_paths:
         parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_file.read_text())
         assert len(parse_result.twitter) > 0
@@ -132,7 +140,7 @@ def test_general_with_file_fixtures(provide_html_file_paths):
         assert len(parse_result.title) > 0
 
 
-def test_parsing_any_twitter_tag():
+def test_parsing_any_twitter_tag() -> None:
     """Test case with name and property attrs for twitter."""
     example_fixture_with_name: str = """
     <meta name="twitter:card" content="summary_large_image">
@@ -148,5 +156,4 @@ def test_parsing_any_twitter_tag():
     """
     for one_fixture in (example_fixture_with_name, example_fixture_with_property):
         parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_fixture)
-        print(parse_result)
-        assert len(parse_result.twitter) == 4
+        assert len(parse_result.twitter) == EXPECTED_TWITTER_TAGS_COUNT
