@@ -1,60 +1,67 @@
-[tool.poetry]
+[project]
 name = "meta-tags-parser"
 version = "1.3.0"
 description = "Fast and modern meta tags parser (og, twitter, title, description, etc) with snippet support"
-authors = ["Denis Anikin <ad@xfenix.ru>"]
-license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/xfenix/meta-tags-parser/"
+license = {file = "LICENSE"}
+authors = [{name = "Denis Anikin", email = "ad@xfenix.ru"}]
+requires-python = ">=3.9"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-packages = [
-    { include = "meta_tags_parser" }
+dependencies = [
+    "httpx>=0.28.1",
 ]
 
-[tool.poetry.urls]
-"Documentation" = "https://github.com/xfenix/meta-tags-parser"
+[project.urls]
+Documentation = "https://github.com/xfenix/meta-tags-parser"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-httpx = "*"
-
-[tool.poetry.dev-dependencies]
-pytest = "*"
-pytest-cov = "*"
-Faker = "*"
-pytest-asyncio = "*"
-pylint = "*"
-mypy = "*"
-pytest-xdist = "*"
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "Faker>=37.5.3",
+    "pytest-asyncio>=1.1.0",
+    "pylint>=3.3.8",
+    "mypy>=1.17.1",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.12.8",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.isort]
-line_length = 120
-multi_line_output = 3
-include_trailing_comma = true
-lines_after_imports = 2
-lexicographical = true
-sections = ["FUTURE", "STDLIB", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
-no_lines_before = ["STDLIB", "THIRDPARTY"]
-known_third_party = []
-known_local_folder = ["meta_tags_parser"]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "-s --cov=meta_tags_parser --cov=tests --cov-report term-missing"
 
-[tool.pylint.format]
-max-line-length=120
+[tool.ruff]
+fix = true
+unsafe-fixes = true
+line-length = 120
+extend-exclude = ["benchmark"]
 
-[tool.pylint.messages_control]
-disable=["logging-fstring-interpolation"]
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["EM", "FBT", "TRY003", "D1", "D203", "D213", "G004", "FA", "COM812", "ISC001"]
+
+[tool.ruff.lint.isort]
+no-lines-before = ["standard-library", "local-folder"]
+known-third-party = []
+known-local-folder = []
+lines-after-imports = 2
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*.py" = ["S101", "S311"]
+
+[tool.coverage.report]
+exclude_also = ["if typing.TYPE_CHECKING:"]

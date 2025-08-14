@@ -2,12 +2,15 @@
 from __future__ import annotations
 import re
 import typing
-from collections.abc import KeysView
 
 from . import settings, structs
 
 
-_RE_FLAGS: re.RegexFlag = re.I | re.M | re.S
+if typing.TYPE_CHECKING:
+    from collections.abc import KeysView
+
+
+_RE_FLAGS: re.RegexFlag = re.IGNORECASE | re.MULTILINE | re.DOTALL
 TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile(r"<title>\s*(.*?)\s*</title>", flags=_RE_FLAGS)
 META_TAGS_RE: typing.Final[re.Pattern] = re.compile(r"<meta([^>]*)>", flags=_RE_FLAGS)
 TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile(
@@ -19,7 +22,7 @@ def _extract_social_tags_from_precusor(
     all_tech_attrs: list[dict[str, structs.ValuesGroup]],
     media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
-    possible_settings_for_parsing: dict[str, typing.Union[str, tuple]] = settings.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
+    possible_settings_for_parsing: dict[str, str | tuple] = settings.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
         og_tag_name: str = ""
@@ -46,20 +49,19 @@ def _extract_basic_tags_from_precursor(
 
         if len(output_buffer) == len(settings.BASIC_META_TAGS):
             break
-
-        for one_ordinary_meta_tag in settings.BASIC_META_TAGS:
+        output_buffer.extend(
+            structs.OneMetaTag(
+                name=one_ordinary_meta_tag,
+                value=one_attr_group["content"].original,
+            )
+            for one_ordinary_meta_tag in settings.BASIC_META_TAGS
             if (
                 "name" in tech_keys
                 and one_attr_group["name"].normalized == one_ordinary_meta_tag
                 and "content" in one_attr_group
                 and one_attr_group["content"].original
-            ):
-                output_buffer.append(
-                    structs.OneMetaTag(
-                        name=one_ordinary_meta_tag,
-                        value=one_attr_group["content"].original,
-                    )
-                )
+            )
+        )
     return output_buffer
 
 
@@ -92,31 +94,45 @@ def _extract_all_other_tags_from_precursor(
     return output_buffer
 
 
-def parse_meta_tags_from_source(source_code: str, what_to_parse=settings.DEFAULT_PARSE_GROUP) -> structs.TagsGroup:
+def _prepare_normalized_meta_attrs(
+    source_code: str,
+) -> list[dict[str, structs.ValuesGroup]]:
+    raw_tags_attrs: list[str] = META_TAGS_RE.findall(source_code)
+    normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = []
+    for one_raw_attrs_row in raw_tags_attrs:
+        prepared_attrs: dict[str, structs.ValuesGroup] = {}
+        for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(one_raw_attrs_row)).items():
+            prepared_attrs[attr_key.lower().strip()] = structs.ValuesGroup(
+                attr_value, attr_value.lower().strip()
+            )
+        normalized_meta_attrs.append(prepared_attrs)
+    return normalized_meta_attrs
+
+
+def parse_meta_tags_from_source(
+    source_code: str,
+    what_to_parse: tuple[structs.WhatToParse, ...] = settings.DEFAULT_PARSE_GROUP,
+) -> structs.TagsGroup:
     """Parse meta tags from source code."""
     builded_result: structs.TagsGroup = structs.TagsGroup()
 
     if structs.WhatToParse.TITLE in what_to_parse:
-        possible_match: typing.Optional[re.Match] = TITLE_TAG_RE.search(source_code)
+        possible_match: re.Match[str] | None = TITLE_TAG_RE.search(source_code)
         if possible_match:
             possible_groups: tuple[typing.Any, ...] = possible_match.groups()
-            if len(possible_groups) > 0:
+            if possible_groups:
                 builded_result.title = str(possible_groups[0])
 
-    if (
-        structs.WhatToParse.OPEN_GRAPH in what_to_parse
-        or structs.WhatToParse.TWITTER in what_to_parse
-        or structs.WhatToParse.BASIC in what_to_parse
-        or structs.WhatToParse.OTHER in what_to_parse
+    if any(
+        one in what_to_parse
+        for one in (
+            structs.WhatToParse.OPEN_GRAPH,
+            structs.WhatToParse.TWITTER,
+            structs.WhatToParse.BASIC,
+            structs.WhatToParse.OTHER,
+        )
     ):
-        raw_tags_attrs: typing.Final[list] = META_TAGS_RE.findall(source_code)
-        normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = []
-        for one_raw_attrs_row in raw_tags_attrs:
-            prepared_attrs: dict = {}
-            for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(one_raw_attrs_row)).items():
-                prepared_attrs[attr_key.lower().strip()] = structs.ValuesGroup(attr_value, attr_value.lower().strip())
-            normalized_meta_attrs.append(prepared_attrs)
-        del raw_tags_attrs
+        normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = _prepare_normalized_meta_attrs(source_code)
 
         if structs.WhatToParse.OPEN_GRAPH in what_to_parse:
             builded_result.open_graph = _extract_social_tags_from_precusor(

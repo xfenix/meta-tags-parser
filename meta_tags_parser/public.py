@@ -1,4 +1,5 @@
 """Bunch of public methods."""
+
 from . import download, parse, structs
 from .snippets import parse_snippets_from_source
 
@@ -24,8 +25,8 @@ async def parse_snippets_from_url_async(web_url: str) -> structs.SnippetGroup:
 
 
 __all__ = [
-    "parse_tags_from_url",
-    "parse_tags_from_url_async",
     "parse_snippets_from_url",
     "parse_snippets_from_url_async",
+    "parse_tags_from_url",
+    "parse_tags_from_url_async",
 ]
