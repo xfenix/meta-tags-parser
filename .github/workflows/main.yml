@@ -18,7 +18,7 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/uv-action@v1
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --dev
@@ -50,7 +50,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/uv-action@v1
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.11"
       - name: Publish package
