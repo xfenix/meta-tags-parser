@@ -14,14 +14,17 @@ on:
 
 env:
   PYTHON_LATEST: "3.13"
-  PYTHON_OLD_VERSIONS: '["3.9", "3.10", "3.11", "3.12"]'
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ${{ fromJson(env.PYTHON_OLD_VERSIONS) }}
+        python-version:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
