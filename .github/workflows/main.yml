@@ -75,6 +75,7 @@ jobs:
         run: |
           uv version "${GITHUB_REF_NAME#v}"
           uv build
+          uv pip install dist/*.whl
           uv publish --username "${{ secrets.PYPI_USERNAME }}" --password "${{ secrets.PYPI_PASSWORD }}"
 
   deploy-coverage:
