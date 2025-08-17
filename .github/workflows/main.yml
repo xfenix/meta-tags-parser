@@ -11,6 +11,7 @@ on:
       - "*"
     paths-ignore:
       - .github/badges/**
+      - .github/coverage/**
 
 env:
   PYTHON_LATEST: "3.13"
@@ -36,6 +37,10 @@ jobs:
   coverage-badge:
     runs-on: ubuntu-latest
     needs: tests
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -45,12 +50,16 @@ jobs:
       - run: uv run ruff check --no-fix .
       - run: uv run mypy meta_tags_parser scripts
       - run: uv build
-      - run: uv run pytest -n2 . --cov-report=xml
+      - run: uv run pytest -n2 . --cov-report=xml --cov-report=html
       - run: uv run python scripts/generate_coverage_badge.py
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'docs: update coverage badge'
           file_pattern: .github/badges/coverage.json
+      - run: mv htmlcov coverage
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: coverage
 
   publish-pypi:
     needs: coverage-badge
@@ -67,3 +76,16 @@ jobs:
           uv version "${GITHUB_REF_NAME#v}"
           uv build
           uv publish --username "${{ secrets.PYPI_USERNAME }}" --password "${{ secrets.PYPI_PASSWORD }}"
+
+  deploy-coverage:
+    needs: coverage-badge
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
