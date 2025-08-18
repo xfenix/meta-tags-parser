@@ -2,9 +2,11 @@
 from __future__ import annotations
 import dataclasses
 import enum
+import typing
 
 
-@dataclasses.dataclass
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class OneMetaTag:
     """Helper public tag wrapper."""
 
@@ -12,7 +14,8 @@ class OneMetaTag:
     value: str
 
 
-@dataclasses.dataclass
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class ValuesGroup:
     """Helper inner wrapper."""
 
@@ -20,7 +23,8 @@ class ValuesGroup:
     normalized: str
 
 
-@dataclasses.dataclass
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class TagsGroup:
     """Return struct."""
 
@@ -31,7 +35,8 @@ class TagsGroup:
     other: list[OneMetaTag] = dataclasses.field(default_factory=list)
 
 
-@dataclasses.dataclass
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class SocialMediaSnippet:
     """Social media snippet group."""
 
@@ -43,7 +48,8 @@ class SocialMediaSnippet:
     url: str = ""
 
 
-@dataclasses.dataclass
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class SnippetGroup:
     """Groupping for social media."""
 
@@ -51,6 +57,7 @@ class SnippetGroup:
     twitter: SocialMediaSnippet = dataclasses.field(default_factory=SocialMediaSnippet)
 
 
+@typing.final
 class WhatToParse(enum.IntEnum):
     """Enum for parsing configuration."""
 
