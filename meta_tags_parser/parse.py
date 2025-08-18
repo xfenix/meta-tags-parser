@@ -103,7 +103,7 @@ def _prepare_normalized_meta_attrs(
         prepared_attrs: dict[str, structs.ValuesGroup] = {}
         for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(one_raw_attrs_row)).items():
             prepared_attrs[attr_key.lower().strip()] = structs.ValuesGroup(
-                attr_value, attr_value.lower().strip()
+                original=attr_value, normalized=attr_value.lower().strip()
             )
         normalized_meta_attrs.append(prepared_attrs)
     return normalized_meta_attrs
@@ -114,14 +114,18 @@ def parse_meta_tags_from_source(
     what_to_parse: tuple[structs.WhatToParse, ...] = settings.DEFAULT_PARSE_GROUP,
 ) -> structs.TagsGroup:
     """Parse meta tags from source code."""
-    builded_result: structs.TagsGroup = structs.TagsGroup()
+    page_title: str = ""
+    basic_meta_tags: list[structs.OneMetaTag] = []
+    open_graph_meta_tags: list[structs.OneMetaTag] = []
+    twitter_meta_tags: list[structs.OneMetaTag] = []
+    other_meta_tags: list[structs.OneMetaTag] = []
 
     if structs.WhatToParse.TITLE in what_to_parse:
         possible_match: re.Match[str] | None = TITLE_TAG_RE.search(source_code)
         if possible_match:
             possible_groups: tuple[typing.Any, ...] = possible_match.groups()
             if possible_groups:
-                builded_result.title = str(possible_groups[0])
+                page_title = str(possible_groups[0])
 
     if any(
         one in what_to_parse
@@ -135,22 +139,28 @@ def parse_meta_tags_from_source(
         normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = _prepare_normalized_meta_attrs(source_code)
 
         if structs.WhatToParse.OPEN_GRAPH in what_to_parse:
-            builded_result.open_graph = _extract_social_tags_from_precusor(
+            open_graph_meta_tags = _extract_social_tags_from_precusor(
                 normalized_meta_attrs, structs.WhatToParse.OPEN_GRAPH
             )
 
         if structs.WhatToParse.TWITTER in what_to_parse:
-            builded_result.twitter = _extract_social_tags_from_precusor(
+            twitter_meta_tags = _extract_social_tags_from_precusor(
                 normalized_meta_attrs, structs.WhatToParse.TWITTER
             )
 
         if structs.WhatToParse.BASIC in what_to_parse:
-            builded_result.basic = _extract_basic_tags_from_precursor(normalized_meta_attrs)
+            basic_meta_tags = _extract_basic_tags_from_precursor(normalized_meta_attrs)
 
         if structs.WhatToParse.OTHER in what_to_parse:
-            builded_result.other = _extract_all_other_tags_from_precursor(normalized_meta_attrs)
+            other_meta_tags = _extract_all_other_tags_from_precursor(normalized_meta_attrs)
 
-    return builded_result
+    return structs.TagsGroup(
+        title=page_title,
+        basic=basic_meta_tags,
+        open_graph=open_graph_meta_tags,
+        twitter=twitter_meta_tags,
+        other=other_meta_tags,
+    )
 
 
 __all__ = ["parse_meta_tags_from_source"]
