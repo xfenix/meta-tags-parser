@@ -32,6 +32,8 @@ class TestCaseWithMultilineTags:
         experiment with your content then preview how your webpage will look on Google, Facebook, Twitter and more!">
         <meta property="og:image"
         content="https://metatags.io/assets/meta-tags-16a33a6a8531e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="https://metatags.io/">
@@ -40,6 +42,8 @@ class TestCaseWithMultilineTags:
         content="With Meta Tags you can edit and experiment with your content then preview
         how your webpage will look on Google, Facebook, Twitter and more!">
         <meta property="twitter:image" content="https://metatags.io/assets/hm-fail.png">
+        <meta property="twitter:image:width" content="1200">
+        <meta property="twitter:image:height" content="630">
     </head>
     <body>
         <a href="#">Kek</a>
@@ -105,6 +109,8 @@ class TestCaseWithMultilineTags:
                     "https://metatags.io/assets/meta-tags-16a33a6a853"
                     "1e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png"
                 ),
+                image_width="1200",
+                image_height="630",
                 url="https://metatags.io/",
             ),
             twitter=structs.SocialMediaSnippet(
@@ -114,6 +120,8 @@ class TestCaseWithMultilineTags:
                     "        how your webpage will look on Google, Facebook, Twitter and more!"
                 ),
                 image="https://metatags.io/assets/hm-fail.png",
+                image_width="1200",
+                image_height="630",
                 url="https://metatags.io/",
             ),
         )
@@ -127,6 +135,8 @@ class TestCaseWithMultilineTags:
         assert testable_object.twitter.title == "Hi, whatsup kekeke"
         assert testable_object.open_graph.title == ""
         assert testable_object.open_graph.description == ""
+        assert testable_object.twitter.image_width == 0
+        assert testable_object.twitter.image_height == 0
 
 
 def test_general_with_file_fixtures(
