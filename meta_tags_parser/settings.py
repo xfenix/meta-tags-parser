@@ -8,7 +8,7 @@ from . import structs
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = ("title", "description", "keywords", "robots", "viewport")
 SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
     dict[
-        typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER], dict[str, str | tuple]
+        typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER], dict[str, str | tuple[str, ...]]
     ]
 ] = {
     structs.WhatToParse.OPEN_GRAPH: {"prop": ("property",), "prefix": "og:"},

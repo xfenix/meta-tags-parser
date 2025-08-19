@@ -1,7 +1,6 @@
-"""Main parsing module."""
-from __future__ import annotations
-import re
 import typing
+
+from selectolax.lexbor import LexborHTMLParser
 
 from . import settings, structs
 
@@ -10,19 +9,11 @@ if typing.TYPE_CHECKING:
     from collections.abc import KeysView
 
 
-_RE_FLAGS: re.RegexFlag = re.IGNORECASE | re.MULTILINE | re.DOTALL
-TITLE_TAG_RE: typing.Final[re.Pattern] = re.compile(r"<title>\s*(.*?)\s*</title>", flags=_RE_FLAGS)
-META_TAGS_RE: typing.Final[re.Pattern] = re.compile(r"<meta([^>]*)>", flags=_RE_FLAGS)
-TAG_ATTRS_RE: typing.Final[re.Pattern] = re.compile(
-    r"(?:([^\s=\"']+)\s*=\s*(?:(?:[\"'](.*?)[\"'])|[^\s\"']*))", flags=_RE_FLAGS
-)
-
-
-def _extract_social_tags_from_precusor(
+def _extract_social_tags_from_precursor(
     all_tech_attrs: list[dict[str, structs.ValuesGroup]],
     media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
-    possible_settings_for_parsing: dict[str, str | tuple] = settings.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
+    possible_settings_for_parsing: dict[str, str | tuple[str, ...]] = settings.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
         og_tag_name: str = ""
@@ -41,7 +32,7 @@ def _extract_social_tags_from_precusor(
 
 
 def _extract_basic_tags_from_precursor(
-    all_tech_attrs: list[dict[str, structs.ValuesGroup]]
+    all_tech_attrs: list[dict[str, structs.ValuesGroup]],
 ) -> list[structs.OneMetaTag]:
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
@@ -66,7 +57,7 @@ def _extract_basic_tags_from_precursor(
 
 
 def _extract_all_other_tags_from_precursor(
-    all_tech_attrs: list[dict[str, structs.ValuesGroup]]
+    all_tech_attrs: list[dict[str, structs.ValuesGroup]],
 ) -> list[structs.OneMetaTag]:
     output_buffer: list[structs.OneMetaTag] = []
     for one_attr_group in all_tech_attrs:
@@ -95,15 +86,16 @@ def _extract_all_other_tags_from_precursor(
 
 
 def _prepare_normalized_meta_attrs(
-    source_code: str,
+    html_tree: LexborHTMLParser,
 ) -> list[dict[str, structs.ValuesGroup]]:
-    raw_tags_attrs: list[str] = META_TAGS_RE.findall(source_code)
     normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = []
-    for one_raw_attrs_row in raw_tags_attrs:
+    for meta_node in html_tree.css("meta"):
         prepared_attrs: dict[str, structs.ValuesGroup] = {}
-        for attr_key, attr_value in dict(TAG_ATTRS_RE.findall(one_raw_attrs_row)).items():
-            prepared_attrs[attr_key.lower().strip()] = structs.ValuesGroup(
-                original=attr_value, normalized=attr_value.lower().strip()
+        for attr_name, raw_value in meta_node.attributes.items():
+            prepared_value = raw_value or ""
+            prepared_attrs[attr_name.lower().strip()] = structs.ValuesGroup(
+                original=prepared_value,
+                normalized=prepared_value.lower().strip(),
             )
         normalized_meta_attrs.append(prepared_attrs)
     return normalized_meta_attrs
@@ -114,18 +106,17 @@ def parse_meta_tags_from_source(
     what_to_parse: tuple[structs.WhatToParse, ...] = settings.DEFAULT_PARSE_GROUP,
 ) -> structs.TagsGroup:
     """Parse meta tags from source code."""
-    page_title: str = ""
+    page_title = ""
     basic_meta_tags: list[structs.OneMetaTag] = []
     open_graph_meta_tags: list[structs.OneMetaTag] = []
     twitter_meta_tags: list[structs.OneMetaTag] = []
     other_meta_tags: list[structs.OneMetaTag] = []
 
+    html_tree = LexborHTMLParser(source_code)
     if structs.WhatToParse.TITLE in what_to_parse:
-        possible_match: re.Match[str] | None = TITLE_TAG_RE.search(source_code)
-        if possible_match:
-            possible_groups: tuple[typing.Any, ...] = possible_match.groups()
-            if possible_groups:
-                page_title = str(possible_groups[0])
+        title_node = html_tree.css_first("title")
+        if title_node:
+            page_title = title_node.text().strip()
 
     if any(
         one in what_to_parse
@@ -136,17 +127,15 @@ def parse_meta_tags_from_source(
             structs.WhatToParse.OTHER,
         )
     ):
-        normalized_meta_attrs: list[dict[str, structs.ValuesGroup]] = _prepare_normalized_meta_attrs(source_code)
+        normalized_meta_attrs = _prepare_normalized_meta_attrs(html_tree)
 
         if structs.WhatToParse.OPEN_GRAPH in what_to_parse:
-            open_graph_meta_tags = _extract_social_tags_from_precusor(
+            open_graph_meta_tags = _extract_social_tags_from_precursor(
                 normalized_meta_attrs, structs.WhatToParse.OPEN_GRAPH
             )
 
         if structs.WhatToParse.TWITTER in what_to_parse:
-            twitter_meta_tags = _extract_social_tags_from_precusor(
-                normalized_meta_attrs, structs.WhatToParse.TWITTER
-            )
+            twitter_meta_tags = _extract_social_tags_from_precursor(normalized_meta_attrs, structs.WhatToParse.TWITTER)
 
         if structs.WhatToParse.BASIC in what_to_parse:
             basic_meta_tags = _extract_basic_tags_from_precursor(normalized_meta_attrs)

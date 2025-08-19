@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "httpx>=0.28.1",
+    "selectolax>=0.3.33",
 ]
 
 [project.urls]
