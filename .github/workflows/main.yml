@@ -22,7 +22,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
@@ -54,7 +53,7 @@ jobs:
       - run: uv run python scripts/generate_coverage_badge.py
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'docs: update coverage badge'
+          commit_message: "docs: update coverage badge"
           file_pattern: .github/badges/coverage.json
       - run: mv htmlcov coverage
       - uses: actions/upload-pages-artifact@v3
