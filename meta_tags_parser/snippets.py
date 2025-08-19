@@ -5,11 +5,10 @@ from . import structs
 from .parse import parse_meta_tags_from_source
 
 
-def _normalize_dimension(dimension_text: str) -> int:
-    try:
+def _parse_dimension(dimension_text: str) -> int:
+    if dimension_text.isdigit():
         return int(dimension_text)
-    except ValueError:
-        return 0
+    return 0
 
 
 _SNIPPET_RULES: typing.Final[
@@ -20,10 +19,10 @@ _SNIPPET_RULES: typing.Final[
     "url": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, url=tag_value),
     "image": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, image=tag_value),
     "image:width": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, image_width=_normalize_dimension(tag_value)
+        snippet_data, image_width=_parse_dimension(tag_value)
     ),
     "image:height": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, image_height=_normalize_dimension(tag_value)
+        snippet_data, image_height=_parse_dimension(tag_value)
     ),
 }
 
@@ -31,15 +30,16 @@ _SNIPPET_RULES: typing.Final[
 def _merge_snippet_tag(
     snippet_object: structs.SocialMediaSnippet, one_meta_tag: structs.OneMetaTag
 ) -> structs.SocialMediaSnippet:
-    rule = _SNIPPET_RULES.get(one_meta_tag.name)
+    rule: typing.Final[
+        typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet] | None
+    ] = _SNIPPET_RULES.get(one_meta_tag.name)
     if rule is None:
         return snippet_object
     return rule(snippet_object, one_meta_tag.value)
 
 
 def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
-    """Parse snippets from source code."""
-    parsed_group: structs.TagsGroup = parse_meta_tags_from_source(
+    parsed_group: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(
         source_code, (structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER)
     )
     result_group: structs.SnippetGroup = structs.SnippetGroup()
