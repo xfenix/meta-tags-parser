@@ -1,15 +1,11 @@
-from __future__ import annotations
 import pathlib
 import random
 import typing
 
 import pytest
+from faker import Faker
 
 from meta_tags_parser import settings
-
-
-if typing.TYPE_CHECKING:
-    from faker import Faker
 
 
 FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"

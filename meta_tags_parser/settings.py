@@ -1,18 +1,29 @@
-from __future__ import annotations
+import types
 import typing
 
 from . import structs
 
 
-BASIC_META_TAGS: typing.Final[tuple[str, ...]] = ("title", "description", "keywords", "robots", "viewport")
+BASIC_META_TAGS: typing.Final[tuple[str, ...]] = (
+    "title",
+    "description",
+    "keywords",
+    "robots",
+    "viewport",
+)
 SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
-    dict[typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER], dict[str, str | tuple[str, ...]]]
-] = {
-    structs.WhatToParse.OPEN_GRAPH: {"prop": ("property",), "prefix": "og:"},
-    # weird thing about twitter: it use name and property simultaneously
-    # i mean name is old format, property is new, but all currently accepted as i see at the moment
-    structs.WhatToParse.TWITTER: {"prop": ("name", "property"), "prefix": "twitter:"},
-}
+    typing.Mapping[
+        typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
+        typing.Mapping[str, str | tuple[str, ...]],
+    ]
+] = types.MappingProxyType(
+    {
+        structs.WhatToParse.OPEN_GRAPH: types.MappingProxyType({"prop": ("property",), "prefix": "og:"}),
+        # weird thing about twitter: it use name and property simultaneously
+        # i mean name is old format, property is new, but all currently accepted as i see at the moment
+        structs.WhatToParse.TWITTER: types.MappingProxyType({"prop": ("name", "property"), "prefix": "twitter:"}),
+    }
+)
 DEFAULT_PARSE_GROUP: typing.Final[tuple[structs.WhatToParse, ...]] = (
     structs.WhatToParse.TITLE,
     structs.WhatToParse.BASIC,
