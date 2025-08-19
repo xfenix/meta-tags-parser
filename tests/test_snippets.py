@@ -7,7 +7,12 @@ from meta_tags_parser import parse_snippets_from_source
 
 @pytest.mark.parametrize(
     ("dimension_text", "expected_width"),
-    [("123", 123), ("abc", 0)],
+    [
+        ("123", 123),
+        ("abc", 0),
+        ("\u0665", 0),
+        ("²", 0),
+    ],
 )
 def test_parse_image_width(dimension_text: str, expected_width: int) -> None:
     html_text: typing.Final = f'<meta property="twitter:image:width" content="{dimension_text}">'

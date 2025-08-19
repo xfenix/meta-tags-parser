@@ -7,9 +7,12 @@ from .parse import parse_meta_tags_from_source
 
 
 def _parse_dimension(dimension_text: str) -> int:
-    if dimension_text.isdigit():
-        return int(dimension_text)
-    return 0
+    cleaned_text: typing.Final[str] = dimension_text.strip()
+    if not cleaned_text:
+        return 0
+    if not cleaned_text.isascii() or not cleaned_text.isdigit():
+        return 0
+    return int(cleaned_text)
 
 
 _SNIPPET_RULES: typing.Final[
@@ -35,9 +38,9 @@ _SNIPPET_RULES: typing.Final[
 def _merge_snippet_tag(
     snippet_object: structs.SocialMediaSnippet, one_meta_tag: structs.OneMetaTag
 ) -> structs.SocialMediaSnippet:
-    rule: typing.Final[
-        typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet] | None
-    ] = _SNIPPET_RULES.get(one_meta_tag.name)
+    rule: typing.Final[typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet] | None] = (
+        _SNIPPET_RULES.get(one_meta_tag.name)
+    )
     if rule is None:
         return snippet_object
     return rule(snippet_object, one_meta_tag.value)
