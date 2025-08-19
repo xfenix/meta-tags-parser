@@ -1,5 +1,3 @@
-"""Bunch of public methods."""
-
 from . import download, parse, structs
 from .snippets import parse_snippets_from_source
 

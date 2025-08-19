@@ -1,4 +1,3 @@
-"""This module only for development."""
 import os
 
 from meta_tags_parser.parse import parse_meta_tags_from_source

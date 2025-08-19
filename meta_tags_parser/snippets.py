@@ -1,4 +1,3 @@
-"""Snippets helper functions."""
 import dataclasses
 import typing
 
@@ -16,18 +15,10 @@ def _normalize_dimension(dimension_text: str) -> int:
 _SNIPPET_RULES: typing.Final[
     dict[str, typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet]]
 ] = {
-    "title": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, title=tag_value
-    ),
-    "description": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, description=tag_value
-    ),
-    "url": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, url=tag_value
-    ),
-    "image": lambda snippet_data, tag_value: dataclasses.replace(
-        snippet_data, image=tag_value
-    ),
+    "title": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, title=tag_value),
+    "description": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, description=tag_value),
+    "url": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, url=tag_value),
+    "image": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, image=tag_value),
     "image:width": lambda snippet_data, tag_value: dataclasses.replace(
         snippet_data, image_width=_normalize_dimension(tag_value)
     ),
@@ -70,4 +61,3 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
 
 
 __all__ = ["parse_snippets_from_source"]
-

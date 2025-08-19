@@ -1,4 +1,3 @@
-"""Just a bunch of hardcoded trash-htmls for development purposes."""
 import typing
 
 

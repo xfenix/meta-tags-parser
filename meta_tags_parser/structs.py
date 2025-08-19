@@ -1,4 +1,3 @@
-"""Main parsing module."""
 from __future__ import annotations
 import dataclasses
 import enum

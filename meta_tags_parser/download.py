@@ -1,4 +1,3 @@
-"""Downloader functions."""
 import httpx
 
 

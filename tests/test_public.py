@@ -1,4 +1,3 @@
-"""Simple public interface tests."""
 from __future__ import annotations
 
 import pytest
@@ -6,9 +5,7 @@ import pytest
 from meta_tags_parser import public
 
 
-def test_public_download(
-    monkeypatch: pytest.MonkeyPatch, provide_fake_meta: tuple[dict[str, str], str]
-) -> None:
+def test_public_download(monkeypatch: pytest.MonkeyPatch, provide_fake_meta: tuple[dict[str, str], str]) -> None:
     """Test download via public API."""
 
     # pylint: disable=too-few-public-methods

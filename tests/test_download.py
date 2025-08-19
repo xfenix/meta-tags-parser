@@ -1,4 +1,3 @@
-"""Test simple download helpers (stupid tests of course)."""
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
