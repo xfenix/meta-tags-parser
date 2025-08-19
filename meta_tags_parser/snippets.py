@@ -6,11 +6,10 @@ from . import structs
 from .parse import parse_meta_tags_from_source
 
 
-def _normalize_dimension(dimension_text: str) -> int:
-    try:
+def _parse_dimension(dimension_text: str) -> int:
+    if dimension_text.isdigit():
         return int(dimension_text)
-    except ValueError:
-        return 0
+    return 0
 
 
 _SNIPPET_RULES: typing.Final[
@@ -45,8 +44,7 @@ def _merge_snippet_tag(
 
 
 def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
-    """Parse snippets from source code."""
-    parsed_group: structs.TagsGroup = parse_meta_tags_from_source(
+    parsed_group: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(
         source_code, (structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER)
     )
     result_group: structs.SnippetGroup = structs.SnippetGroup()
