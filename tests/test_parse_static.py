@@ -109,8 +109,8 @@ class TestCaseWithMultilineTags:
                     "https://metatags.io/assets/meta-tags-16a33a6a853"
                     "1e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png"
                 ),
-                image_width="1200",
-                image_height="630",
+                image_width=1200,
+                image_height=630,
                 url="https://metatags.io/",
             ),
             twitter=structs.SocialMediaSnippet(
@@ -120,8 +120,8 @@ class TestCaseWithMultilineTags:
                     "        how your webpage will look on Google, Facebook, Twitter and more!"
                 ),
                 image="https://metatags.io/assets/hm-fail.png",
-                image_width="1200",
-                image_height="630",
+                image_width=1200,
+                image_height=630,
                 url="https://metatags.io/",
             ),
         )

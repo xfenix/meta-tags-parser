@@ -6,14 +6,44 @@ from . import structs
 from .parse import parse_meta_tags_from_source
 
 
-SNIPPET_META_TAGS: typing.Final[tuple[str, ...]] = (
-    "title",
-    "description",
-    "url",
-    "image",
-    "image:width",
-    "image:height",
-)
+def _normalize_dimension(dimension_text: str) -> int:
+    try:
+        return int(dimension_text)
+    except ValueError:
+        return 0
+
+
+_SNIPPET_RULES: typing.Final[
+    dict[str, typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet]]
+] = {
+    "title": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, title=tag_value
+    ),
+    "description": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, description=tag_value
+    ),
+    "url": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, url=tag_value
+    ),
+    "image": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, image=tag_value
+    ),
+    "image:width": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, image_width=_normalize_dimension(tag_value)
+    ),
+    "image:height": lambda snippet_data, tag_value: dataclasses.replace(
+        snippet_data, image_height=_normalize_dimension(tag_value)
+    ),
+}
+
+
+def _merge_snippet_tag(
+    snippet_object: structs.SocialMediaSnippet, one_meta_tag: structs.OneMetaTag
+) -> structs.SocialMediaSnippet:
+    rule = _SNIPPET_RULES.get(one_meta_tag.name)
+    if rule is None:
+        return snippet_object
+    return rule(snippet_object, one_meta_tag.value)
 
 
 def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
@@ -28,12 +58,10 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
         ("twitter", parsed_group.twitter),
         ("open_graph", parsed_group.open_graph),
     ):
-        snippet_fields: dict[str, str] = {}
-        meta_tag: structs.OneMetaTag
-        for meta_tag in parsed_tags:
-            if meta_tag.name in SNIPPET_META_TAGS:
-                snippet_fields[meta_tag.name.replace(":", "_")] = meta_tag.value
-        snippet_object = structs.SocialMediaSnippet(**snippet_fields)
+        snippet_object: structs.SocialMediaSnippet = structs.SocialMediaSnippet()
+        one_meta_tag: structs.OneMetaTag
+        for one_meta_tag in parsed_tags:
+            snippet_object = _merge_snippet_tag(snippet_object, one_meta_tag)
         if social_name == "twitter":
             result_group = dataclasses.replace(result_group, twitter=snippet_object)
         else:
@@ -42,3 +70,4 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
 
 
 __all__ = ["parse_snippets_from_source"]
+
