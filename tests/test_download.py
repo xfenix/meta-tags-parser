@@ -1,14 +1,9 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
+from faker import Faker
 
 from meta_tags_parser import download
-
-
-if TYPE_CHECKING:
-    from faker import Faker
 
 
 @pytest.mark.asyncio

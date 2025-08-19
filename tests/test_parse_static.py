@@ -1,11 +1,7 @@
-from __future__ import annotations
+import pathlib
 import typing
 
 from meta_tags_parser import parse_meta_tags_from_source, parse_snippets_from_source, structs
-
-
-if typing.TYPE_CHECKING:
-    import pathlib
 
 
 EXPECTED_TWITTER_TAGS_COUNT: typing.Final = 4

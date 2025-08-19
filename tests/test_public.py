@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pytest
 
 from meta_tags_parser import public
