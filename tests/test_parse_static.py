@@ -1,4 +1,3 @@
-"""Test through public interfaces, e.g. main tests here."""
 from __future__ import annotations
 import typing
 

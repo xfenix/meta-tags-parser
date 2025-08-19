@@ -1,4 +1,3 @@
-"""Test through public interfaces, e.g. main tests here."""
 from __future__ import annotations
 import typing
 
@@ -11,9 +10,7 @@ EXPECTED_OTHER_TAGS_COUNT: typing.Final = 2
 
 
 @pytest.mark.parametrize("_", range(5))
-def test_parse_from_random_memory(
-    provide_fake_meta: tuple[dict[str, str], str], _: int
-) -> None:
+def test_parse_from_random_memory(provide_fake_meta: tuple[dict[str, str], str], _: int) -> None:
     """Random based tests of main parsing."""
     result: structs.TagsGroup = parse_meta_tags_from_source(provide_fake_meta[1])
     for one_group in (result.open_graph, result.twitter):
