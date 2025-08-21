@@ -16,9 +16,7 @@ def _parse_dimension(dimension_text: str) -> int:
 
 
 _SNIPPET_RULES: typing.Final[
-    typing.Mapping[
-        str, typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet]
-    ]
+    typing.Mapping[str, typing.Callable[[structs.SocialMediaSnippet, str], structs.SocialMediaSnippet]]
 ] = types.MappingProxyType(
     {
         "title": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, title=tag_value),
@@ -26,10 +24,10 @@ _SNIPPET_RULES: typing.Final[
         "url": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, url=tag_value),
         "image": lambda snippet_data, tag_value: dataclasses.replace(snippet_data, image=tag_value),
         "image:width": lambda snippet_data, tag_value: dataclasses.replace(
-            snippet_data, image_width=_normalize_dimension(tag_value)
+            snippet_data, image_width=_parse_dimension(tag_value)
         ),
         "image:height": lambda snippet_data, tag_value: dataclasses.replace(
-            snippet_data, image_height=_normalize_dimension(tag_value)
+            snippet_data, image_height=_parse_dimension(tag_value)
         ),
     }
 )
@@ -66,5 +64,3 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
         else:
             result_group = dataclasses.replace(result_group, open_graph=snippet_object)
     return result_group
-
-
