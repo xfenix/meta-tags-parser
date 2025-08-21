@@ -8,7 +8,7 @@
 [![Imports: isort](https://img.shields.io/badge/imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://timothycrosley.github.io/isort/)
 
 Fast, modern, pure Python meta tag parser and snippet creator with full support for type annotations.
-The base package ships with `py.typed` and provides structured output. No jelly dicts—only typed structures!
+The base package ships with `py.typed` and provides structured output. No jelly dicts — only typed structures!
 If you want to see what social media snippets look like, check the example:
 ![](https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/social-media-snippets.png)
 
