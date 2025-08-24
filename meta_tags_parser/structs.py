@@ -1,6 +1,12 @@
 import dataclasses
 import enum
+import functools
 import typing
+
+
+@functools.cache
+def _normalize_tag_name(tag_name: str) -> str:
+    return tag_name.replace(":", "_")
 
 
 @typing.final
@@ -10,6 +16,10 @@ class OneMetaTag:
 
     name: str
     value: str
+
+    @property
+    def normalized_name(self) -> str:
+        return _normalize_tag_name(self.name)
 
 
 @typing.final

@@ -28,9 +28,9 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
         structs.SocialMediaSnippet()
         one_meta_tag: structs.OneMetaTag
         for one_meta_tag in parsed_tags:
-            if one_meta_tag.name not in structs.WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET:
+            if one_meta_tag.normalized_name not in structs.WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET:
                 continue
-            prepared_snippet_data[one_meta_tag.name] = (
+            prepared_snippet_data[one_meta_tag.normalized_name] = (
                 _parse_dimension(one_meta_tag.value) if one_meta_tag.name.startswith("image:") else one_meta_tag.value
             )
         prepared_group_data[social_name] = structs.SocialMediaSnippet(**prepared_snippet_data)
