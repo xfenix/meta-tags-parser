@@ -20,5 +20,3 @@ def parse_snippets_from_url(web_url: str) -> structs.SnippetGroup:
 async def parse_snippets_from_url_async(web_url: str) -> structs.SnippetGroup:
     """Stupid and low quality helper."""
     return parse_snippets_from_source(await download.download_page_async(web_url))
-
-
