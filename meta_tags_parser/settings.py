@@ -31,11 +31,3 @@ DEFAULT_PARSE_GROUP: typing.Final[tuple[structs.WhatToParse, ...]] = (
     structs.WhatToParse.TWITTER,
     structs.WhatToParse.OTHER,
 )
-SOCIAL_MEDIA_SNIPPET_WHAT_ATTRS_TO_COPY: typing.Final[tuple[str, ...]] = (
-    "title",
-    "description",
-    "url",
-    "image",
-    "image:width",
-    "image:height",
-)

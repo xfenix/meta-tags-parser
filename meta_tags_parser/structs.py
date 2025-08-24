@@ -46,6 +46,9 @@ class SocialMediaSnippet:
     url: str = ""
 
 
+WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
+
+
 @typing.final
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class SnippetGroup:
