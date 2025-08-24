@@ -109,7 +109,9 @@ def parse_meta_tags_from_source(
 ) -> structs.TagsGroup:
     """Parse meta tags from source code."""
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(source_code)
-    title_node = html_tree.css_first("title") if structs.WhatToParse.TITLE in what_to_parse else None
+    title_node: typing.Final[str | None] = (
+        html_tree.css_first("title") if structs.WhatToParse.TITLE in what_to_parse else None
+    )
     page_title: typing.Final[str] = title_node.text().strip() if title_node else ""
 
     should_parse_meta: typing.Final[bool] = any(
@@ -139,9 +141,7 @@ def parse_meta_tags_from_source(
     )
 
     basic_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
-        _extract_basic_tags_from_precursor(normalized_meta_attrs)
-        if structs.WhatToParse.BASIC in what_to_parse
-        else []
+        _extract_basic_tags_from_precursor(normalized_meta_attrs) if structs.WhatToParse.BASIC in what_to_parse else []
     )
 
     other_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
@@ -157,5 +157,3 @@ def parse_meta_tags_from_source(
         twitter=twitter_meta_tags,
         other=other_meta_tags,
     )
-
-
