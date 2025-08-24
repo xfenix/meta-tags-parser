@@ -25,7 +25,6 @@ def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
         ("open_graph", parsed_group.open_graph),
     ):
         prepared_snippet_data: dict[str, typing.Any] = {}
-        structs.SocialMediaSnippet()
         one_meta_tag: structs.OneMetaTag
         for one_meta_tag in parsed_tags:
             if one_meta_tag.normalized_name not in structs.WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET:
