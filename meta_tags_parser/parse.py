@@ -1,6 +1,6 @@
 import typing
 
-from selectolax.lexbor import LexborHTMLParser
+from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from . import settings, structs
 
@@ -109,7 +109,7 @@ def parse_meta_tags_from_source(
 ) -> structs.TagsGroup:
     """Parse meta tags from source code."""
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(source_code)
-    title_node: typing.Final[str | None] = (
+    title_node: typing.Final[LexborNode | None] = (
         html_tree.css_first("title") if structs.WhatToParse.TITLE in what_to_parse else None
     )
     page_title: typing.Final[str] = title_node.text().strip() if title_node else ""
