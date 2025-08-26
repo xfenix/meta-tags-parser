@@ -77,3 +77,22 @@ class WhatToParse(enum.IntEnum):
     OPEN_GRAPH = 2
     TWITTER = 3
     OTHER = 4
+
+
+def _default_what_to_parse() -> tuple["WhatToParse", ...]:
+    from . import settings as _settings  # noqa: PLC0415
+
+    return _settings.DEFAULT_PARSE_GROUP
+
+
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
+class PackageOptions:
+    """Package configuration options."""
+
+    what_to_parse: tuple[WhatToParse, ...] = dataclasses.field(default_factory=_default_what_to_parse)
+    optimize_input: bool = True
+    max_prefix_chars: int = 65536
+    max_scan_chars: int = 524288
+    hard_limit_chars: int | None = None
+    boundary_tags: tuple[str, str] = ("</head>", "<body")
