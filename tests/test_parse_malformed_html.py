@@ -20,7 +20,6 @@ def test_parse_handles_malformed_html() -> None:
 
 
 @hypothesis.given(title_value=st.text(), description_value=st.text())
-@typing.no_type_check
 def test_attribute_normalization_in_parser(title_value: str, description_value: str) -> None:
     html_source: typing.Final = f"""
     <meta property="og:title" value="{title_value}>

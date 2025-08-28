@@ -33,7 +33,6 @@ UNICODE_DIGITS: typing.Final = st.characters(whitelist_categories=["Nd"])
         st.text(alphabet=st.characters(blacklist_characters='<>"'), min_size=1, max_size=8),
     )
 )
-@typing.no_type_check
 def test_parse_image_width_property(dimension_text: str) -> None:
     html_text: typing.Final = f'<meta property="twitter:image:width" content="{dimension_text}">'
     parsed_snippets: typing.Final = parse_snippets_from_source(html_text)

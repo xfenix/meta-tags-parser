@@ -9,6 +9,14 @@ if typing.TYPE_CHECKING:
     from collections.abc import KeysView
 
 
+_GLOBAL_OPTIONS_HOLDER: dict[str, structs.PackageOptions] = {"options": structs.PackageOptions()}
+
+
+def set_config_for_metatags(new_options: structs.PackageOptions) -> None:
+    """Override default package options."""
+    _GLOBAL_OPTIONS_HOLDER["options"] = new_options
+
+
 def _slice_html_for_meta(  # noqa: PLR0913
     html_source: str,
     *,
@@ -36,14 +44,6 @@ def _slice_html_for_meta(  # noqa: PLR0913
         limit_position: int = cut_position if hard_limit_chars is None else min(cut_position, hard_limit_chars)
         return html_source[:limit_position]
     return html_source[:max_prefix_chars]
-
-
-_GLOBAL_OPTIONS_HOLDER: dict[str, structs.PackageOptions] = {"options": structs.PackageOptions()}
-
-
-def set_package_options(new_options: structs.PackageOptions) -> None:
-    """Override default package options."""
-    _GLOBAL_OPTIONS_HOLDER["options"] = new_options
 
 
 def _extract_social_tags_from_precursor(
