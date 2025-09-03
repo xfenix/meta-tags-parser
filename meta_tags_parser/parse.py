@@ -1,3 +1,4 @@
+import contextvars
 import typing
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
@@ -7,14 +8,13 @@ from . import settings, structs
 
 if typing.TYPE_CHECKING:
     from collections.abc import KeysView
-
-
-_GLOBAL_OPTIONS_HOLDER: dict[str, structs.PackageOptions] = {"options": structs.PackageOptions()}
+_GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.PackageOptions]] = contextvars.ContextVar("options")
+_GLOBAL_OPTIONS_HOLDER.set(structs.PackageOptions())
 
 
 def set_config_for_metatags(new_options: structs.PackageOptions) -> None:
     """Override default package options."""
-    _GLOBAL_OPTIONS_HOLDER["options"] = new_options
+    _GLOBAL_OPTIONS_HOLDER.set(new_options)
 
 
 def _slice_html_for_meta(  # noqa: PLR0913
@@ -151,7 +151,7 @@ def parse_meta_tags_from_source(
     else:
         normalized_source = source_code
 
-    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER["options"]
+    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER.get()
     sliced_source: str = _slice_html_for_meta(
         normalized_source,
         optimize_input=active_options.optimize_input,
