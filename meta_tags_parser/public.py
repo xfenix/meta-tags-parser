@@ -2,21 +2,49 @@ from . import download, parse, structs
 from .snippets import parse_snippets_from_source
 
 
-def parse_tags_from_url(web_url: str) -> structs.TagsGroup:
+def parse_tags_from_url(
+    web_url: str,
+    *,
+    options: structs.PackageOptions | None = None,
+) -> structs.TagsGroup:
     """Stupid and low quality helper."""
-    return parse.parse_meta_tags_from_source(download.download_page_sync(web_url))
+    return parse.parse_meta_tags_from_source(
+        download.download_page_sync(web_url),
+        options=options,
+    )
 
 
-async def parse_tags_from_url_async(web_url: str) -> structs.TagsGroup:
+async def parse_tags_from_url_async(
+    web_url: str,
+    *,
+    options: structs.PackageOptions | None = None,
+) -> structs.TagsGroup:
     """Stupid and low quality helper."""
-    return parse.parse_meta_tags_from_source(await download.download_page_async(web_url))
+    return parse.parse_meta_tags_from_source(
+        await download.download_page_async(web_url),
+        options=options,
+    )
 
 
-def parse_snippets_from_url(web_url: str) -> structs.SnippetGroup:
+def parse_snippets_from_url(
+    web_url: str,
+    *,
+    options: structs.PackageOptions | None = None,
+) -> structs.SnippetGroup:
     """Stupid and low quality helper."""
-    return parse_snippets_from_source(download.download_page_sync(web_url))
+    return parse_snippets_from_source(
+        download.download_page_sync(web_url),
+        options=options,
+    )
 
 
-async def parse_snippets_from_url_async(web_url: str) -> structs.SnippetGroup:
+async def parse_snippets_from_url_async(
+    web_url: str,
+    *,
+    options: structs.PackageOptions | None = None,
+) -> structs.SnippetGroup:
     """Stupid and low quality helper."""
-    return parse_snippets_from_source(await download.download_page_async(web_url))
+    return parse_snippets_from_source(
+        await download.download_page_async(web_url),
+        options=options,
+    )

@@ -24,10 +24,3 @@ SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
         structs.WhatToParse.TWITTER: types.MappingProxyType({"prop": ("name", "property"), "prefix": "twitter:"}),
     }
 )
-DEFAULT_PARSE_GROUP: typing.Final[tuple[structs.WhatToParse, ...]] = (
-    structs.WhatToParse.TITLE,
-    structs.WhatToParse.BASIC,
-    structs.WhatToParse.OPEN_GRAPH,
-    structs.WhatToParse.TWITTER,
-    structs.WhatToParse.OTHER,
-)

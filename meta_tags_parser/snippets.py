@@ -1,7 +1,7 @@
+import dataclasses
 import typing
 
-from . import structs
-from .parse import parse_meta_tags_from_source
+from . import parse, structs
 
 
 def _parse_dimension(dimension_text: str) -> int:
@@ -13,9 +13,19 @@ def _parse_dimension(dimension_text: str) -> int:
     return int(cleaned_text)
 
 
-def parse_snippets_from_source(source_code: str) -> structs.SnippetGroup:
-    parsed_group: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(
-        source_code, (structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER)
+def parse_snippets_from_source(
+    source_code: str,
+    *,
+    options: structs.PackageOptions | None = None,
+) -> structs.SnippetGroup:
+    active_options: structs.PackageOptions = options or structs.PackageOptions()
+    snippets_options: structs.PackageOptions = dataclasses.replace(
+        active_options,
+        what_to_parse=(structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER),
+    )
+    parsed_group: typing.Final[structs.TagsGroup] = parse.parse_meta_tags_from_source(
+        source_code,
+        options=snippets_options,
     )
     prepared_group_data: dict[str, structs.SocialMediaSnippet] = {}
     social_name: str

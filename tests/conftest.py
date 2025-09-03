@@ -9,7 +9,7 @@ from meta_tags_parser import settings
 
 
 FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"
-HTML_FIXTURES: typing.Final[tuple[str, ...]] = ("globo-com", "gazeta-ru")
+HTML_FIXTURES: typing.Final[tuple[str, ...]] = tuple(sorted(one_file.stem for one_file in FIXTURES_DIR.glob("*.html")))
 POSSIBLE_OG_TAGS_VALUES: typing.Final[tuple[str, ...]] = (
     "title",
     "url",

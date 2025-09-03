@@ -9,6 +9,43 @@ if typing.TYPE_CHECKING:
     from collections.abc import KeysView
 
 
+_GLOBAL_OPTIONS_HOLDER: dict[str, structs.PackageOptions] = {"options": structs.PackageOptions()}
+
+
+def set_config_for_metatags(new_options: structs.PackageOptions) -> None:
+    """Override default package options."""
+    _GLOBAL_OPTIONS_HOLDER["options"] = new_options
+
+
+def _slice_html_for_meta(  # noqa: PLR0913
+    html_source: str,
+    *,
+    optimize_input: bool = True,
+    max_prefix_chars: int = 65536,
+    max_scan_chars: int = 524288,
+    hard_limit_chars: int | None = None,
+    boundary_tags: tuple[str, str] = ("</head>", "<body"),
+) -> str:
+    if not optimize_input:
+        return html_source
+    scanning_prefix: str = html_source[:max_scan_chars]
+    lowered_prefix: str = scanning_prefix.lower()
+    earliest_position: int | None = None
+    matched_boundary: str = ""
+    for boundary_tag in boundary_tags:
+        boundary_position: int = lowered_prefix.find(boundary_tag)
+        if boundary_position != -1 and (earliest_position is None or boundary_position < earliest_position):
+            earliest_position = boundary_position
+            matched_boundary = boundary_tag
+    if earliest_position is not None:
+        cut_position: int = (
+            earliest_position + len(boundary_tags[0]) if matched_boundary == boundary_tags[0] else earliest_position
+        )
+        limit_position: int = cut_position if hard_limit_chars is None else min(cut_position, hard_limit_chars)
+        return html_source[:limit_position]
+    return html_source[:max_prefix_chars]
+
+
 def _extract_social_tags_from_precursor(
     all_tech_attrs: list[dict[str, structs.ValuesGroup]],
     media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
@@ -104,11 +141,29 @@ def _prepare_normalized_meta_attrs(
 
 
 def parse_meta_tags_from_source(
-    source_code: str,
-    what_to_parse: tuple[structs.WhatToParse, ...] = settings.DEFAULT_PARSE_GROUP,
+    source_code: str | bytes,
+    *,
+    options: structs.PackageOptions | None = None,
 ) -> structs.TagsGroup:
     """Parse meta tags from source code."""
-    html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(source_code)
+    if isinstance(source_code, bytes):
+        normalized_source: str = source_code.decode(errors="ignore")
+    else:
+        normalized_source = source_code
+
+    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER["options"]
+    sliced_source: str = _slice_html_for_meta(
+        normalized_source,
+        optimize_input=active_options.optimize_input,
+        max_prefix_chars=active_options.max_prefix_chars,
+        max_scan_chars=active_options.max_scan_chars,
+        hard_limit_chars=active_options.hard_limit_chars,
+        boundary_tags=active_options.boundary_tags,
+    )
+
+    what_to_parse: tuple[structs.WhatToParse, ...] = active_options.what_to_parse
+
+    html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(sliced_source)
     title_node: typing.Final[LexborNode | None] = (
         html_tree.css_first("title") if structs.WhatToParse.TITLE in what_to_parse else None
     )

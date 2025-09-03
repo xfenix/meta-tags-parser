@@ -56,9 +56,6 @@ class SocialMediaSnippet:
     url: str = ""
 
 
-WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
-
-
 @typing.final
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class SnippetGroup:
@@ -77,3 +74,25 @@ class WhatToParse(enum.IntEnum):
     OPEN_GRAPH = 2
     TWITTER = 3
     OTHER = 4
+
+
+@typing.final
+@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
+class PackageOptions:
+    """Package configuration options."""
+
+    what_to_parse: tuple[WhatToParse, ...] = (
+        WhatToParse.TITLE,
+        WhatToParse.BASIC,
+        WhatToParse.OPEN_GRAPH,
+        WhatToParse.TWITTER,
+        WhatToParse.OTHER,
+    )
+    optimize_input: bool = True
+    max_prefix_chars: int = 65536
+    max_scan_chars: int = 524288
+    hard_limit_chars: int | None = None
+    boundary_tags: tuple[str, str] = ("</head>", "<body")
+
+
+WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()

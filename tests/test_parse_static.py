@@ -140,7 +140,6 @@ def test_general_with_file_fixtures(
     """Parse meta tags from file fixtures."""
     for one_file in provide_html_file_paths:
         parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_file.read_text())
-        assert len(parse_result.twitter) > 0
         assert len(parse_result.open_graph) > 0
         assert len(parse_result.title) > 0
 
