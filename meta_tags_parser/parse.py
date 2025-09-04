@@ -8,6 +8,8 @@ from . import settings, structs
 
 if typing.TYPE_CHECKING:
     from collections.abc import KeysView
+
+
 _GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.PackageOptions]] = contextvars.ContextVar("options")
 _GLOBAL_OPTIONS_HOLDER.set(structs.PackageOptions())
 
