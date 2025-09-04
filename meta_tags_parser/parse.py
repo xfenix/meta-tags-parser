@@ -19,17 +19,14 @@ def set_config_for_metatags(new_options: structs.PackageOptions) -> None:
     _GLOBAL_OPTIONS_HOLDER.set(new_options)
 
 
-def _slice_html_for_meta(  # noqa: PLR0913
+def _slice_html_for_meta(
     html_source: str,
     *,
-    optimize_input: bool = True,
     max_prefix_chars: int = 65536,
     max_scan_chars: int = 524288,
     hard_limit_chars: int | None = None,
     boundary_tags: tuple[str, str] = ("</head>", "<body"),
 ) -> str:
-    if not optimize_input:
-        return html_source
     scanning_prefix: str = html_source[:max_scan_chars]
     lowered_prefix: str = scanning_prefix.lower()
     earliest_position: int | None = None
@@ -147,63 +144,57 @@ def parse_meta_tags_from_source(
     *,
     options: structs.PackageOptions | None = None,
 ) -> structs.TagsGroup:
-    """Parse meta tags from source code."""
-    if isinstance(source_code, bytes):
-        normalized_source: str = source_code.decode(errors="ignore")
-    else:
-        normalized_source = source_code
-
-    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER.get()
-    sliced_source: str = _slice_html_for_meta(
-        normalized_source,
-        optimize_input=active_options.optimize_input,
-        max_prefix_chars=active_options.max_prefix_chars,
-        max_scan_chars=active_options.max_scan_chars,
-        hard_limit_chars=active_options.hard_limit_chars,
-        boundary_tags=active_options.boundary_tags,
+    normalized_source: typing.Final = typing.cast(
+        "str", source_code.decode(errors="ignore") if isinstance(source_code, bytes) else source_code
     )
-
-    what_to_parse: tuple[structs.WhatToParse, ...] = active_options.what_to_parse
-
-    html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(sliced_source)
+    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER.get()
+    html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(
+        _slice_html_for_meta(
+            normalized_source,
+            max_prefix_chars=active_options.max_prefix_chars,
+            max_scan_chars=active_options.max_scan_chars,
+            hard_limit_chars=active_options.hard_limit_chars,
+            boundary_tags=active_options.boundary_tags,
+        )
+        if active_options.optimize_input
+        else normalized_source
+    )
     title_node: typing.Final[LexborNode | None] = (
-        html_tree.css_first("title") if structs.WhatToParse.TITLE in what_to_parse else None
+        html_tree.css_first("title") if structs.WhatToParse.TITLE in active_options.what_to_parse else None
     )
     page_title: typing.Final[str] = title_node.text().strip() if title_node else ""
-
-    should_parse_meta: typing.Final[bool] = any(
-        one in what_to_parse
-        for one in (
-            structs.WhatToParse.OPEN_GRAPH,
-            structs.WhatToParse.TWITTER,
-            structs.WhatToParse.BASIC,
-            structs.WhatToParse.OTHER,
-        )
-    )
-
     normalized_meta_attrs: typing.Final[list[dict[str, structs.ValuesGroup]]] = (
-        _prepare_normalized_meta_attrs(html_tree) if should_parse_meta else []
+        _prepare_normalized_meta_attrs(html_tree)
+        if any(
+            one_item in active_options.what_to_parse
+            for one_item in (
+                structs.WhatToParse.OPEN_GRAPH,
+                structs.WhatToParse.TWITTER,
+                structs.WhatToParse.BASIC,
+                structs.WhatToParse.OTHER,
+            )
+        )
+        else []
     )
 
     open_graph_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
         _extract_social_tags_from_precursor(normalized_meta_attrs, structs.WhatToParse.OPEN_GRAPH)
-        if structs.WhatToParse.OPEN_GRAPH in what_to_parse
+        if structs.WhatToParse.OPEN_GRAPH in active_options.what_to_parse
         else []
     )
-
     twitter_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
         _extract_social_tags_from_precursor(normalized_meta_attrs, structs.WhatToParse.TWITTER)
-        if structs.WhatToParse.TWITTER in what_to_parse
+        if structs.WhatToParse.TWITTER in active_options.what_to_parse
         else []
     )
-
     basic_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
-        _extract_basic_tags_from_precursor(normalized_meta_attrs) if structs.WhatToParse.BASIC in what_to_parse else []
+        _extract_basic_tags_from_precursor(normalized_meta_attrs)
+        if structs.WhatToParse.BASIC in active_options.what_to_parse
+        else []
     )
-
     other_meta_tags: typing.Final[list[structs.OneMetaTag]] = (
         _extract_all_other_tags_from_precursor(normalized_meta_attrs)
-        if structs.WhatToParse.OTHER in what_to_parse
+        if structs.WhatToParse.OTHER in active_options.what_to_parse
         else []
     )
 
