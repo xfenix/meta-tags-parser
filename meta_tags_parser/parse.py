@@ -10,11 +10,13 @@ if typing.TYPE_CHECKING:
     from collections.abc import KeysView
 
 
-_GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.PackageOptions]] = contextvars.ContextVar("options")
-_GLOBAL_OPTIONS_HOLDER.set(structs.PackageOptions())
+_GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.SettingsFromUser]] = contextvars.ContextVar(
+    "options"
+)
+_GLOBAL_OPTIONS_HOLDER.set(structs.SettingsFromUser())
 
 
-def set_config_for_metatags(new_options: structs.PackageOptions) -> None:
+def set_config_for_metatags(new_options: structs.SettingsFromUser) -> None:
     """Override default package options."""
     _GLOBAL_OPTIONS_HOLDER.set(new_options)
 
@@ -142,12 +144,12 @@ def _prepare_normalized_meta_attrs(
 def parse_meta_tags_from_source(
     source_code: str | bytes,
     *,
-    options: structs.PackageOptions | None = None,
+    options: structs.SettingsFromUser | None = None,
 ) -> structs.TagsGroup:
     normalized_source: typing.Final = typing.cast(
         "str", source_code.decode(errors="ignore") if isinstance(source_code, bytes) else source_code
     )
-    active_options: structs.PackageOptions = options or _GLOBAL_OPTIONS_HOLDER.get()
+    active_options: structs.SettingsFromUser = options or _GLOBAL_OPTIONS_HOLDER.get()
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(
         _slice_html_for_meta(
             normalized_source,

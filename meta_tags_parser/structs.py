@@ -35,7 +35,7 @@ class ValuesGroup:
 @typing.final
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class TagsGroup:
-    """Return struct."""
+    """For user returns this exact struct."""
 
     title: str = ""
     basic: list[OneMetaTag] = dataclasses.field(default_factory=list)
@@ -68,8 +68,6 @@ class SnippetGroup:
 
 @typing.final
 class WhatToParse(enum.IntEnum):
-    """Enum for parsing configuration."""
-
     TITLE = 0
     BASIC = 1
     OPEN_GRAPH = 2
@@ -79,9 +77,7 @@ class WhatToParse(enum.IntEnum):
 
 @typing.final
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
-class PackageOptions:
-    """Package configuration options."""
-
+class SettingsFromUser:
     what_to_parse: tuple[WhatToParse, ...] = (
         WhatToParse.TITLE,
         WhatToParse.BASIC,
@@ -97,7 +93,6 @@ class PackageOptions:
 
 
 WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
-
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = (
     "title",
     "description",

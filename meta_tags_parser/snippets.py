@@ -16,10 +16,10 @@ def _parse_dimension(dimension_text: str) -> int:
 def parse_snippets_from_source(
     source_code: str,
     *,
-    options: structs.PackageOptions | None = None,
+    options: structs.SettingsFromUser | None = None,
 ) -> structs.SnippetGroup:
-    active_options: structs.PackageOptions = options or structs.PackageOptions()
-    snippets_options: structs.PackageOptions = dataclasses.replace(
+    active_options: structs.SettingsFromUser = options or structs.SettingsFromUser()
+    snippets_options: structs.SettingsFromUser = dataclasses.replace(
         active_options,
         what_to_parse=(structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER),
     )
