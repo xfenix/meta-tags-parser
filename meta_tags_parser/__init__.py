@@ -1,6 +1,6 @@
 from typing import Final
 
-from .parse import parse_meta_tags_from_source, set_config_for_metatags
+from .parse import parse_meta_tags_from_source, set_settings_for_meta_tags
 from .public import (
     parse_snippets_from_url,
     parse_snippets_from_url_async,
@@ -17,5 +17,5 @@ __all__: Final[tuple[str, ...]] = (
     "parse_snippets_from_url_async",
     "parse_tags_from_url",
     "parse_tags_from_url_async",
-    "set_config_for_metatags",
+    "set_settings_for_meta_tags",
 )

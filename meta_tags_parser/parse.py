@@ -15,35 +15,34 @@ _GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.SettingsFrom
 )
 
 
-def set_config_for_metatags(new_options: structs.SettingsFromUser) -> None:
+def set_settings_for_meta_tags(new_options: structs.SettingsFromUser) -> None:
     """Override default package options."""
     _GLOBAL_OPTIONS_HOLDER.set(new_options)
 
 
-def _slice_html_for_meta(
-    html_source: str,
-    *,
-    fallback_limit_chars: int = structs.DEFAULT_SETTINGS_FROM_USER.fallback_limit_chars,
-    max_scan_chars: int = structs.DEFAULT_SETTINGS_FROM_USER.max_scan_chars,
-    hard_limit_chars: int | None = structs.DEFAULT_SETTINGS_FROM_USER.hard_limit_chars,
-    boundary_tags: tuple[str, str] = structs.DEFAULT_SETTINGS_FROM_USER.boundary_tags,
-) -> str:
-    scanning_prefix: str = html_source[:max_scan_chars]
+def _slice_html_for_meta(html_source: str, active_options: structs.SettingsFromUser) -> str:
+    scanning_prefix: str = html_source[: active_options.max_scan_chars]
     lowered_prefix: str = scanning_prefix.lower()
     earliest_position: int | None = None
     matched_boundary: str = ""
-    for boundary_tag in boundary_tags:
-        boundary_position: int = lowered_prefix.find(boundary_tag)
+    for one_boundary_tag in active_options.boundary_tags:
+        boundary_position: int = lowered_prefix.find(one_boundary_tag)
         if boundary_position != -1 and (earliest_position is None or boundary_position < earliest_position):
             earliest_position = boundary_position
-            matched_boundary = boundary_tag
+            matched_boundary = one_boundary_tag
     if earliest_position is not None:
         cut_position: int = (
-            earliest_position + len(boundary_tags[0]) if matched_boundary == boundary_tags[0] else earliest_position
+            earliest_position + len(active_options.boundary_tags[0])
+            if matched_boundary == active_options.boundary_tags[0]
+            else earliest_position
         )
-        limit_position: int = cut_position if hard_limit_chars is None else min(cut_position, hard_limit_chars)
+        limit_position: int = (
+            cut_position
+            if active_options.hard_limit_chars is None
+            else min(cut_position, active_options.hard_limit_chars)
+        )
         return html_source[:limit_position]
-    return html_source[:fallback_limit_chars]
+    return html_source[: active_options.fallback_limit_chars]
 
 
 def _extract_social_tags_from_precursor(
@@ -148,15 +147,7 @@ def parse_meta_tags_from_source(
     )
     active_options: structs.SettingsFromUser = options or _GLOBAL_OPTIONS_HOLDER.get()
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(
-        _slice_html_for_meta(
-            normalized_source,
-            fallback_limit_chars=active_options.fallback_limit_chars,
-            max_scan_chars=active_options.max_scan_chars,
-            hard_limit_chars=active_options.hard_limit_chars,
-            boundary_tags=active_options.boundary_tags,
-        )
-        if active_options.optimize_input
-        else normalized_source
+        _slice_html_for_meta(normalized_source, active_options) if active_options.optimize_input else normalized_source
     )
     title_node: typing.Final[LexborNode | None] = (
         html_tree.css_first("title") if structs.WhatToParse.TITLE in active_options.what_to_parse else None
