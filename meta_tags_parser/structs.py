@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import functools
+import types
 import typing
 
 
@@ -96,3 +97,24 @@ class PackageOptions:
 
 
 WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
+
+BASIC_META_TAGS: typing.Final[tuple[str, ...]] = (
+    "title",
+    "description",
+    "keywords",
+    "robots",
+    "viewport",
+)
+SETTINGS_FOR_SOCIAL_MEDIA: typing.Final[
+    typing.Mapping[
+        typing.Literal[WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER],
+        typing.Mapping[str, str | tuple[str, ...]],
+    ]
+] = types.MappingProxyType(
+    {
+        WhatToParse.OPEN_GRAPH: types.MappingProxyType({"prop": ("property",), "prefix": "og:"}),
+        # weird thing about twitter: it use name and property simultaneously
+        # i mean name is old format, property is new, but all currently accepted as i see at the moment
+        WhatToParse.TWITTER: types.MappingProxyType({"prop": ("name", "property"), "prefix": "twitter:"}),
+    }
+)
