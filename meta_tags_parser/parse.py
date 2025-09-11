@@ -3,7 +3,7 @@ import typing
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
-from . import settings, structs
+from . import structs
 
 
 if typing.TYPE_CHECKING:
@@ -50,7 +50,7 @@ def _extract_social_tags_from_precursor(
     media_type: typing.Literal[structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER],
 ) -> list[structs.OneMetaTag]:
     possible_settings_for_parsing: typing.Final[typing.Mapping[str, str | tuple[str, ...]]] = (
-        settings.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
+        structs.SETTINGS_FOR_SOCIAL_MEDIA[media_type]
     )
     output_buffer: typing.Final[list[structs.OneMetaTag]] = []
     for one_attr_group in all_tech_attrs:
@@ -76,14 +76,14 @@ def _extract_basic_tags_from_precursor(
     for one_attr_group in all_tech_attrs:
         tech_keys: KeysView[str] = one_attr_group.keys()
 
-        if len(output_buffer) == len(settings.BASIC_META_TAGS):
+        if len(output_buffer) == len(structs.BASIC_META_TAGS):
             break
         output_buffer.extend(
             structs.OneMetaTag(
                 name=one_ordinary_meta_tag,
                 value=one_attr_group["content"].original,
             )
-            for one_ordinary_meta_tag in settings.BASIC_META_TAGS
+            for one_ordinary_meta_tag in structs.BASIC_META_TAGS
             if (
                 "name" in tech_keys
                 and one_attr_group["name"].normalized == one_ordinary_meta_tag
@@ -102,7 +102,7 @@ def _extract_all_other_tags_from_precursor(
         tech_keys: KeysView[str] = one_attr_group.keys()
 
         should_we_skip: bool = False
-        for one_config in settings.SETTINGS_FOR_SOCIAL_MEDIA.values():
+        for one_config in structs.SETTINGS_FOR_SOCIAL_MEDIA.values():
             for attr_name in one_config["prop"]:
                 if attr_name in tech_keys and one_attr_group[attr_name].normalized.startswith(one_config["prefix"]):
                     should_we_skip = True
@@ -111,7 +111,7 @@ def _extract_all_other_tags_from_precursor(
             continue
 
         if "name" in tech_keys:
-            if one_attr_group["name"].normalized in settings.BASIC_META_TAGS:
+            if one_attr_group["name"].normalized in structs.BASIC_META_TAGS:
                 continue
             if "content" in one_attr_group and one_attr_group["content"].original:
                 output_buffer.append(

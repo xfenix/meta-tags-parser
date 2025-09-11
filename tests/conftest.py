@@ -5,7 +5,7 @@ import typing
 import pytest
 from faker import Faker
 
-from meta_tags_parser import settings
+from meta_tags_parser import structs
 
 
 FIXTURES_DIR: typing.Final[pathlib.Path] = pathlib.Path(__file__).parent / "html_fixtures"
@@ -28,7 +28,7 @@ def provide_fake_meta(faker: Faker) -> tuple[dict[str, str], str]:
     output_buffer: list[str] = []
     control_result: list[tuple[str, str]] = []
     output_buffer.extend(
-        f"""<meta name="{one_name}" content="{faker.text()}">""" for one_name in settings.BASIC_META_TAGS
+        f"""<meta name="{one_name}" content="{faker.text()}">""" for one_name in structs.BASIC_META_TAGS
     )
     for one_name in POSSIBLE_OG_TAGS_VALUES:
         for _ in range(random.randint(1, 5)):
