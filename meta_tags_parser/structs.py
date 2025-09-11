@@ -86,12 +86,13 @@ class SettingsFromUser:
         WhatToParse.OTHER,
     )
     optimize_input: bool = True
-    max_prefix_chars: int = 65536
+    fallback_limit_chars: int = 65536
     max_scan_chars: int = 524288
     hard_limit_chars: int | None = None
     boundary_tags: tuple[str, str] = ("</head>", "<body")
 
 
+DEFAULT_SETTINGS_FROM_USER: typing.Final = SettingsFromUser()
 WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = (
     "title",

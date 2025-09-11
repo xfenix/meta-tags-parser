@@ -11,9 +11,8 @@ if typing.TYPE_CHECKING:
 
 
 _GLOBAL_OPTIONS_HOLDER: typing.Final[contextvars.ContextVar[structs.SettingsFromUser]] = contextvars.ContextVar(
-    "options"
+    "options", default=structs.DEFAULT_SETTINGS_FROM_USER
 )
-_GLOBAL_OPTIONS_HOLDER.set(structs.SettingsFromUser())
 
 
 def set_config_for_metatags(new_options: structs.SettingsFromUser) -> None:
@@ -24,10 +23,10 @@ def set_config_for_metatags(new_options: structs.SettingsFromUser) -> None:
 def _slice_html_for_meta(
     html_source: str,
     *,
-    max_prefix_chars: int = 65536,
-    max_scan_chars: int = 524288,
-    hard_limit_chars: int | None = None,
-    boundary_tags: tuple[str, str] = ("</head>", "<body"),
+    fallback_limit_chars: int = structs.DEFAULT_SETTINGS_FROM_USER.fallback_limit_chars,
+    max_scan_chars: int = structs.DEFAULT_SETTINGS_FROM_USER.max_scan_chars,
+    hard_limit_chars: int | None = structs.DEFAULT_SETTINGS_FROM_USER.hard_limit_chars,
+    boundary_tags: tuple[str, str] = structs.DEFAULT_SETTINGS_FROM_USER.boundary_tags,
 ) -> str:
     scanning_prefix: str = html_source[:max_scan_chars]
     lowered_prefix: str = scanning_prefix.lower()
@@ -44,7 +43,7 @@ def _slice_html_for_meta(
         )
         limit_position: int = cut_position if hard_limit_chars is None else min(cut_position, hard_limit_chars)
         return html_source[:limit_position]
-    return html_source[:max_prefix_chars]
+    return html_source[:fallback_limit_chars]
 
 
 def _extract_social_tags_from_precursor(
@@ -125,9 +124,7 @@ def _extract_all_other_tags_from_precursor(
     return output_buffer
 
 
-def _prepare_normalized_meta_attrs(
-    html_tree: LexborHTMLParser,
-) -> list[dict[str, structs.ValuesGroup]]:
+def _prepare_normalized_meta_attrs(html_tree: LexborHTMLParser) -> list[dict[str, structs.ValuesGroup]]:
     normalized_meta_attrs: typing.Final[list[dict[str, structs.ValuesGroup]]] = []
     for meta_node in html_tree.css("meta"):
         prepared_attrs: dict[str, structs.ValuesGroup] = {}
@@ -153,7 +150,7 @@ def parse_meta_tags_from_source(
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(
         _slice_html_for_meta(
             normalized_source,
-            max_prefix_chars=active_options.max_prefix_chars,
+            fallback_limit_chars=active_options.fallback_limit_chars,
             max_scan_chars=active_options.max_scan_chars,
             hard_limit_chars=active_options.hard_limit_chars,
             boundary_tags=active_options.boundary_tags,

@@ -18,7 +18,7 @@ def test_slice_html_without_boundary(prefix_text: str) -> None:
     expected_length: int = 50
     sliced_html: str = _slice_html_for_meta(
         html_source,
-        max_prefix_chars=expected_length,
+        fallback_limit_chars=expected_length,
         max_scan_chars=200,
     )
     assert len(sliced_html) == expected_length
