@@ -36,7 +36,7 @@ UNICODE_DIGITS: typing.Final = st.characters(whitelist_categories=["Nd"])
     )
 )
 def test_parse_image_width_property(dimension_text: str) -> None:
-    html_text: typing.Final = f'<meta property="twitter:image:width" content="{dimension_text}">' 
+    html_text: typing.Final = f'<meta property="twitter:image:width" content="{dimension_text}">'
     parsed_snippets: typing.Final = parse_snippets_from_source(html_text)
     cleaned_text: typing.Final[str] = dimension_text.strip()
     expected_width: typing.Final[int] = int(cleaned_text) if cleaned_text.isascii() and cleaned_text.isdigit() else 0
