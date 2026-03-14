@@ -142,8 +142,8 @@ def parse_meta_tags_from_source(
     *,
     options: structs.SettingsFromUser | None = None,
 ) -> structs.TagsGroup:
-    normalized_source: typing.Final = typing.cast(
-        "str", source_code.decode(errors="ignore") if isinstance(source_code, bytes) else source_code
+    normalized_source: typing.Final[str] = (
+        source_code.decode(errors="ignore") if isinstance(source_code, bytes) else source_code
     )
     active_options: structs.SettingsFromUser = options or _GLOBAL_OPTIONS_HOLDER.get()
     html_tree: typing.Final[LexborHTMLParser] = LexborHTMLParser(

@@ -49,7 +49,7 @@ jobs:
           python-version: ${{ env.PYTHON_LATEST }}
       - run: uv sync --dev
       - run: uv run ruff check --no-fix .
-      - run: uv run mypy meta_tags_parser scripts
+      - run: uv run mypy --strict meta_tags_parser scripts
       - run: uv build
       - run: uv run pytest -n2 . --cov-report=xml --cov-report=html
       - run: uv run python scripts/generate_coverage_badge.py
