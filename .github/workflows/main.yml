@@ -78,7 +78,7 @@ jobs:
           uv version "${GITHUB_REF_NAME#v}"
           uv build
           uv pip install dist/*.whl
-          uv publish --trusted-publishing always
+          uv publish
 
   deploy-coverage:
     needs: coverage-badge
