@@ -1,6 +1,6 @@
 [project]
 name = "meta-tags-parser"
-version = "2.0.1"
+version = "2.0.2"
 description = "Fast and modern meta tags parser (og, twitter, title, description, etc) with snippet support"
 readme = "README.md"
 license = { file = "LICENSE" }

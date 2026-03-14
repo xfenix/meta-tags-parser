@@ -66,18 +66,19 @@ jobs:
     needs: coverage-badge
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ env.PYTHON_LATEST }}
       - name: Publish package
-        continue-on-error: true
         run: |
           uv version "${GITHUB_REF_NAME#v}"
           uv build
           uv pip install dist/*.whl
-          uv publish --token "${{ secrets.PYPI_TOKEN }}"
+          uv publish --trusted-publishing always
 
   deploy-coverage:
     needs: coverage-badge
