@@ -80,6 +80,7 @@ jobs:
   deploy-coverage:
     needs: coverage-badge
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     permissions:
       pages: write
       id-token: write
