@@ -1,11 +1,10 @@
 # Meta tags parser
 
-[![Test, lint, publish](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml/badge.svg)](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml)
+[![Test, lint, publish](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/meta-tags-parser.svg)](https://badge.fury.io/py/meta-tags-parser)
 [![Downloads](https://pepy.tech/badge/meta-tags-parser)](https://pepy.tech/project/meta-tags-parser)
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/.github/badges/coverage.json)](https://xfenix.github.io/meta-tags-parser/)
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-[![Imports: isort](https://img.shields.io/badge/imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://timothycrosley.github.io/isort/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 Fast, modern, pure Python meta tag parser and snippet creator with full support for type annotations.
 The base package ships with `py.typed` and provides structured output. No jelly dicts — only typed structures!
@@ -13,7 +12,7 @@ If you want to see what social media snippets look like, check the example:
 ![](https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/social-media-snippets.png)
 
 ## Requirements
-* Python 3.9+
+* Python 3.10+
 * [HTTPX](https://www.python-httpx.org/)
 * [selectolax](https://github.com/rushter/selectolax)
 
@@ -206,6 +205,7 @@ You can specify exactly what to parse:
 
 ```python
 from meta_tags_parser import parse_meta_tags_from_source, structs
+from meta_tags_parser.structs import WhatToParse
 
 
 result: structs.TagsGroup = parse_meta_tags_from_source("""... source ...""",
