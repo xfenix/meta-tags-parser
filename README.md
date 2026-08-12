@@ -208,8 +208,9 @@ from meta_tags_parser import parse_meta_tags_from_source, structs
 from meta_tags_parser.structs import WhatToParse
 
 
-result: structs.TagsGroup = parse_meta_tags_from_source("""... source ...""",
-    what_to_parse=(WhatToParse.TITLE, WhatToParse.BASIC, WhatToParse.OPEN_GRAPH, WhatToParse.TWITTER, WhatToParse.OTHER)
+result: structs.TagsGroup = parse_meta_tags_from_source(
+    """... source ...""",
+    options=structs.SettingsFromUser(what_to_parse=(WhatToParse.TITLE, WhatToParse.OPEN_GRAPH)),
 )
 ```
 

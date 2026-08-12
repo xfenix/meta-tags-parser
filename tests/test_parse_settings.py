@@ -4,7 +4,7 @@ from meta_tags_parser import parse_meta_tags_from_source, set_settings_for_meta_
 
 
 def test_set_settings_for_meta_tags_overrides_defaults() -> None:
-    html_text: typing.Final[str] = (
+    html_text: typing.Final = (
         "<html><head>"
         "<title>Site Title</title>"
         '<meta name="description" content="Example description">'

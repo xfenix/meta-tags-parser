@@ -1,4 +1,4 @@
-from typing import Final
+import typing
 
 from .parse import parse_meta_tags_from_source, set_settings_for_meta_tags
 from .public import (
@@ -10,7 +10,7 @@ from .public import (
 from .snippets import parse_snippets_from_source
 
 
-__all__: Final[tuple[str, ...]] = (
+__all__: typing.Final[tuple[str, ...]] = (
     "parse_meta_tags_from_source",
     "parse_snippets_from_source",
     "parse_snippets_from_url",

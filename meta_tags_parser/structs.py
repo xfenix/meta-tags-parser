@@ -6,7 +6,7 @@ import typing
 
 
 @functools.cache
-def _normalize_tag_name(tag_name: str) -> str:
+def _transform_tag_name(tag_name: str) -> str:
     return tag_name.replace(":", "_")
 
 
@@ -20,7 +20,7 @@ class OneMetaTag:
 
     @property
     def normalized_name(self) -> str:
-        return _normalize_tag_name(self.name)
+        return _transform_tag_name(self.name)
 
 
 @typing.final
