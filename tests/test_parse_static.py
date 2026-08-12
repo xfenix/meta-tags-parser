@@ -48,7 +48,7 @@ class TestCaseWithMultilineTags:
 
     def test_parse_good_static(self) -> None:
         """Parse static content with more asserts."""
-        positive_result: structs.TagsGroup = parse_meta_tags_from_source(self.FIXTURE_FOR_CASE)
+        positive_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(self.FIXTURE_FOR_CASE)
 
         assert (
             structs.OneMetaTag(
@@ -91,8 +91,7 @@ class TestCaseWithMultilineTags:
 
     def test_snippet_parsing_static(self) -> None:
         """Test snippet parsing."""
-        testable_object: structs.SnippetGroup
-        good_result: structs.SnippetGroup = structs.SnippetGroup(
+        good_result: typing.Final[structs.SnippetGroup] = structs.SnippetGroup(
             open_graph=structs.SocialMediaSnippet(
                 title="Meta Tags — Preview, Edit and Generate",
                 description=(
@@ -122,16 +121,18 @@ class TestCaseWithMultilineTags:
         )
         # need parse multiple times in one session
         for _ in range(3):
-            testable_object = parse_snippets_from_source(self.FIXTURE_FOR_CASE)
-            assert testable_object == good_result, testable_object
+            looped_result: structs.SnippetGroup = parse_snippets_from_source(self.FIXTURE_FOR_CASE)
+            assert looped_result == good_result, looped_result
 
         # fresh new "html"
-        testable_object = parse_snippets_from_source("""<meta name="twitter:title" content="Hi, whatsup kekeke">""")
-        assert testable_object.twitter.title == "Hi, whatsup kekeke"
-        assert testable_object.open_graph.title == ""
-        assert testable_object.open_graph.description == ""
-        assert testable_object.twitter.image_width == 0
-        assert testable_object.twitter.image_height == 0
+        fresh_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(
+            """<meta name="twitter:title" content="Hi, whatsup kekeke">"""
+        )
+        assert fresh_result.twitter.title == "Hi, whatsup kekeke"
+        assert fresh_result.open_graph.title == ""
+        assert fresh_result.open_graph.description == ""
+        assert fresh_result.twitter.image_width == 0
+        assert fresh_result.twitter.image_height == 0
 
 
 def test_general_with_file_fixtures(
@@ -146,18 +147,17 @@ def test_general_with_file_fixtures(
 
 def test_parsing_any_twitter_tag() -> None:
     """Test case with name and property attrs for twitter."""
-    example_fixture_with_name: str = """
+    example_fixture_with_name: typing.Final = """
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://github.com/">
     <meta name="twitter:title" content="Hello, my friend">
     <meta name="twitter:description" content="Content here, yehehe">
     """
-    example_fixture_with_property: str = """
+    example_fixture_with_property: typing.Final = """
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://github.com/">
     <meta property="twitter:title" content="Hello, my friend">
     <meta property="twitter:description" content="Content here, yehehe">
     """
     for one_fixture in (example_fixture_with_name, example_fixture_with_property):
-        parse_result: structs.TagsGroup = parse_meta_tags_from_source(one_fixture)
-        assert len(parse_result.twitter) == EXPECTED_TWITTER_TAGS_COUNT
+        assert len(parse_meta_tags_from_source(one_fixture).twitter) == EXPECTED_TWITTER_TAGS_COUNT

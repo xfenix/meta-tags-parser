@@ -32,6 +32,9 @@ dev = [
     "pytest-xdist>=3.8.0",
     "ruff>=0.12.8",
     "hypothesis>=6.138.0",
+    "community-of-python-flake8-plugin>=0.6.0",
+    "flake8-pyproject>=1.2.4",
+    "auto-typing-final>=1.0.4",
 ]
 
 [build-system]
@@ -52,6 +55,7 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = ["ALL"]
+external = ["COP"]
 ignore = [
     "EM",
     "FBT",
@@ -76,6 +80,18 @@ lines-after-imports = 2
 
 [tool.mypy]
 strict = true
+
+[tool.flake8]
+select = ["COP"]
+exclude = [".venv", ".cache", "benchmark"]
+# web_url/options and the dataclass field names below are the stable public API (kept short
+# intentionally); renaming any of them is a breaking change for downstream consumers.
+per-file-ignores = [
+    "meta_tags_parser/public.py:COP006",
+    "meta_tags_parser/parse.py:COP006",
+    "meta_tags_parser/snippets.py:COP006",
+    "meta_tags_parser/structs.py:COP004",
+]
 
 [tool.coverage.report]
 exclude_also = ["if typing.TYPE_CHECKING:"]

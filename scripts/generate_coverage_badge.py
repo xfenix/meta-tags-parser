@@ -7,24 +7,25 @@ from pathlib import Path
 
 COVERAGE_XML_PATH: typing.Final = Path("coverage.xml")
 BADGE_JSON_PATH: typing.Final = Path(".github/badges/coverage.json")
-LOW_BOUNDARY: typing.Final[float] = 60
-HIGH_BOUNDARY: typing.Final[float] = 80
+LOW_BOUNDARY: typing.Final = 60.0
+HIGH_BOUNDARY: typing.Final = 80.0
+
+
+def _choose_badge_color(coverage_percent: float) -> str:
+    if coverage_percent < LOW_BOUNDARY:
+        return "#E63946"
+    if coverage_percent < HIGH_BOUNDARY:
+        return "#FFB347"
+    return "#2A9D8F"
 
 
 def build_badge_file() -> None:
-    xml_source_text: typing.Final[str] = COVERAGE_XML_PATH.read_text()
-    root_element: typing.Final[ET.Element] = ET.fromstring(xml_source_text)  # noqa: S314
-    line_rate_text: typing.Final[str] = root_element.attrib["line-rate"]
-    coverage_percent: typing.Final[float] = float(line_rate_text) * 100.0
+    coverage_percent: typing.Final[float] = (
+        float(ET.fromstring(COVERAGE_XML_PATH.read_text()).attrib["line-rate"]) * 100.0  # noqa: S314
+    )
 
     message_text: typing.Final[str] = f"{coverage_percent:.0f}%"
-    color_text: str
-    if coverage_percent < LOW_BOUNDARY:
-        color_text = "#E63946"
-    elif coverage_percent < HIGH_BOUNDARY:
-        color_text = "#FFB347"
-    else:
-        color_text = "#2A9D8F"
+    color_text: typing.Final[str] = _choose_badge_color(coverage_percent)
 
     badge_mapping: typing.Final[typing.Mapping[str, typing.Any]] = types.MappingProxyType(
         {

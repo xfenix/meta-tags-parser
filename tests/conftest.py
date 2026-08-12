@@ -22,23 +22,25 @@ POSSIBLE_OG_TAGS_VALUES: typing.Final[tuple[str, ...]] = (
 )
 
 
+def _build_tag_content(faker: Faker, one_name: str) -> str:
+    if one_name in ("url", "video"):
+        return faker.url()
+    if one_name == "image":
+        return faker.image_url()
+    return faker.text()
+
+
 @pytest.fixture
 def provide_fake_meta(faker: Faker) -> tuple[dict[str, str], str]:
     """Generate random wannabe html tags."""
-    output_buffer: list[str] = []
-    control_result: list[tuple[str, str]] = []
+    output_buffer: typing.Final[list[str]] = []
+    control_result: typing.Final[list[tuple[str, str]]] = []
     output_buffer.extend(
         f"""<meta name="{one_name}" content="{faker.text()}">""" for one_name in structs.BASIC_META_TAGS
     )
     for one_name in POSSIBLE_OG_TAGS_VALUES:
         for _ in range(random.randint(1, 5)):
-            tag_content: str
-            if one_name in ("url", "video"):
-                tag_content = faker.url()
-            elif one_name == "image":
-                tag_content = faker.image_url()
-            else:
-                tag_content = faker.text()
+            tag_content: str = _build_tag_content(faker, one_name)
             output_buffer.append(f"""<meta property="og:{one_name}" content="{tag_content}">""")
             output_buffer.append(f"""<meta name="twitter:{one_name}" content="{tag_content}">""")
             control_result.append((one_name, tag_content))

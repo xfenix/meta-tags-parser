@@ -18,8 +18,8 @@ def parse_snippets_from_source(
     *,
     options: structs.SettingsFromUser | None = None,
 ) -> structs.SnippetGroup:
-    active_options: structs.SettingsFromUser = options or structs.SettingsFromUser()
-    snippets_options: structs.SettingsFromUser = dataclasses.replace(
+    active_options: typing.Final[structs.SettingsFromUser] = options or structs.SettingsFromUser()
+    snippets_options: typing.Final[structs.SettingsFromUser] = dataclasses.replace(
         active_options,
         what_to_parse=(structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER),
     )
@@ -27,7 +27,7 @@ def parse_snippets_from_source(
         source_code,
         options=snippets_options,
     )
-    prepared_group_data: dict[str, structs.SocialMediaSnippet] = {}
+    prepared_group_data: typing.Final[dict[str, structs.SocialMediaSnippet]] = {}
     social_name: str
     parsed_tags: list[structs.OneMetaTag]
     for social_name, parsed_tags in (
