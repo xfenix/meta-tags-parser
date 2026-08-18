@@ -16,6 +16,8 @@ basic, other) and the page title out of HTML, and builds social-media snippet pr
 - `meta_tags_parser/__init__.py` — the public export surface.
 - `benchmark/` — standalone speed benchmark, excluded from linting (large embedded payload).
 - `scripts/generate_coverage_badge.py` — CI helper, generates the coverage badge JSON.
+- `scripts/generate_html_corpus.py` + `scripts/corpus_locales.py` — generator of the real-world HTML
+  test corpus (see the Tests section).
 
 ## Supported Python versions
 
@@ -31,7 +33,7 @@ Package manager is **uv**. Do not use bare `pip`/`venv`.
 
 ```bash
 uv sync --dev                                    # install deps (dev group included)
-uv run pytest -n2 .                              # run tests (parallel, with coverage)
+uv run pytest                                    # run tests (parallel via -n auto, with coverage)
 uv run ruff format .                             # format
 uv run ruff check --no-fix .                     # lint (ruff, select = ALL)
 uv run flake8 meta_tags_parser scripts tests     # lint (community-of-python plugin, COP rules)
@@ -88,11 +90,44 @@ the maintainer, not silently by an agent.
 
 ## Tests
 
-- `pytest` + `pytest-xdist` (parallel) + `hypothesis` (property-based) + `faker` (fixture data).
+- `pytest` + `pytest-xdist` (`-n auto` is in `addopts`, always run parallel) + `hypothesis`
+  (property-based) + `faker` and `polyfactory` (generated data).
 - Arrange/Act/Assert; prefer parametrized tests over copy-pasted near-duplicates.
-- `tests/*.py` gets `S101`/`S311` ruff exemptions (asserts and non-crypto random are fine in tests).
-- Keep coverage at 100% for anything reachable without network access; `parse.py`'s `hard_limit_chars`
-  branch is a known, pre-existing minor gap (not something to chase in unrelated changes).
+- Layout follows the testing diamond — a thin layer of unit tests, the bulk in integration:
+  - `tests/unit/` — narrow checks of internals (`_extract_html_scan_window`, `convert_source_to_text`,
+    `_parse_dimension`, the structs).
+  - `tests/integration/` — everything that goes through the public API: parsing semantics, settings,
+    snippets, malformed markup, the download helpers (mocked with `httpx.MockTransport`, never the
+    network), the four captured real pages and the generated real-world corpus.
+  - `tests/conftest.py` holds shared fixtures; `tests/corpus_support.py` reads the corpus manifest;
+    `tests/factories.py` holds the polyfactory factories.
+- Randomness is seeded (`faker_seed`, `SHARED_RANDOM_SOURCE`, hypothesis `deadline=None`), a failing
+  test must be replayable.
+- `tests/**.py` gets `S101`/`S311`/`SLF001`/`PLR2004` and the `RUF001`-family ruff exemptions
+  (asserts, non-crypto random, private access and multilingual literals are all expected here).
+- Keep coverage at 100% for everything reachable without network access, tests included.
+
+### Real-world HTML corpus
+
+`tests/html_corpus/` holds 100 generated pages (~7.5 MB raw, stored gzipped) that imitate real sites:
+10 archetypes (news, shop, video, WordPress blog, docs, SPA, forum, landing, government portal, media
+gallery) across 15 languages (ru, uk, en, de, fr, es, pt-BR, it, pl, tr, ja, zh, ko, ar, he) with 20
+markup quirks (uppercase tags, single/unquoted attributes, duplicated Open Graph tags, meta after the
+head, legacy charsets, byte order marks, emoji, entity escapes, multi character lowercasing, ...).
+
+`tests/html_corpus/expectations.json` is the manifest: for each page it stores the tags that were
+written into the markup, so the tests compare against ground truth rather than against a snapshot of
+parser output. `expected_default` is what the default settings must return, `expected_full` is what
+`optimize_input=False` must return.
+
+Regenerate (deterministic, byte identical between runs) after touching the generator:
+
+```bash
+uv run python -m scripts.generate_html_corpus
+```
+
+Real captured pages live in `tests/html_fixtures/` and have hand written expectations in
+`tests/integration/test_captured_pages.py`; add new ones there when a real site exposes a new shape.
 
 ## Git / PR hygiene
 

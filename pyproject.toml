@@ -35,6 +35,7 @@ dev = [
     "community-of-python-flake8-plugin>=0.6.0",
     "flake8-pyproject>=1.2.4",
     "auto-typing-final>=1.0.4",
+    "polyfactory>=2.22.5",
 ]
 
 [build-system]
@@ -42,7 +43,11 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-addopts = "-s --cov=meta_tags_parser --cov=tests --cov-report term-missing"
+addopts = "-n auto --strict-markers --strict-config --cov=meta_tags_parser --cov=tests --cov-report term-missing"
+testpaths = ["tests"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["error"]
 
 [tool.ruff]
 fix = true
@@ -76,7 +81,11 @@ known-local-folder = []
 lines-after-imports = 2
 
 [tool.ruff.lint.extend-per-file-ignores]
-"tests/*.py" = ["S101", "S311"]
+# RUF001/RUF002/RUF003 flag non latin characters as ambiguous, but multilingual page content is
+# exactly what this parser exists for, so it is expected inside fixtures, corpus data and expectations
+"tests/**.py" = ["S101", "S311", "SLF001", "PLR2004", "RUF001", "RUF002", "RUF003"]
+"scripts/corpus_locales.py" = ["RUF001", "RUF002", "RUF003"]
+"scripts/generate_html_corpus.py" = ["S311", "RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 strict = true

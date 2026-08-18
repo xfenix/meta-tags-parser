@@ -14,11 +14,11 @@ def _parse_dimension(dimension_text: str) -> int:
 
 
 def parse_snippets_from_source(
-    source_code: str,
+    source_code: str | bytes,
     *,
     options: structs.SettingsFromUser | None = None,
 ) -> structs.SnippetGroup:
-    active_options: typing.Final[structs.SettingsFromUser] = options or structs.SettingsFromUser()
+    active_options: typing.Final[structs.SettingsFromUser] = parse.resolve_active_options(options)
     snippets_options: typing.Final[structs.SettingsFromUser] = dataclasses.replace(
         active_options,
         what_to_parse=(structs.WhatToParse.OPEN_GRAPH, structs.WhatToParse.TWITTER),
@@ -37,10 +37,16 @@ def parse_snippets_from_source(
         prepared_snippet_data: dict[str, typing.Any] = {}
         one_meta_tag: structs.OneMetaTag
         for one_meta_tag in parsed_tags:
-            if one_meta_tag.normalized_name not in structs.WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET:
+            snippet_field_name: str = one_meta_tag.normalized_name
+            if snippet_field_name not in structs.WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET:
                 continue
-            prepared_snippet_data[one_meta_tag.normalized_name] = (
-                _parse_dimension(one_meta_tag.value) if one_meta_tag.name.startswith("image:") else one_meta_tag.value
+            # og/twitter allow repeated tags (multiple images for example), the first one is the primary one
+            if snippet_field_name in prepared_snippet_data:
+                continue
+            prepared_snippet_data[snippet_field_name] = (
+                _parse_dimension(one_meta_tag.value)
+                if snippet_field_name in structs.DIMENSION_SNIPPET_FIELDS
+                else one_meta_tag.value
             )
         prepared_group_data[social_name] = structs.SocialMediaSnippet(**prepared_snippet_data)
     return structs.SnippetGroup(**prepared_group_data)
