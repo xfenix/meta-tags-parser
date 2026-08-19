@@ -1,7 +1,8 @@
-"""Parse the whole generated corpus of real world shaped pages.
+"""Parse a hundred pages captured from real sites, in the encodings those sites served them in.
 
-Every page carries the tags it was built from (``tests/html_corpus/expectations.json``), so these
-tests compare against what was written into the markup, not against a snapshot of parser output.
+Nothing here is a snapshot of parser output: every expectation comes from ``tests/reference_parser``,
+an independent implementation of the same documented rules built on the standard library instead of
+selectolax. If the two disagree on a real page, one of them has a bug.
 """
 
 import typing
@@ -9,58 +10,79 @@ import typing
 import pytest
 
 from meta_tags_parser import parse_meta_tags_from_source, parse_snippets_from_source, structs
-from tests import corpus_support
+from meta_tags_parser.parse import convert_source_to_text
+from tests import corpus_support, reference_parser
 
 
+FULL_SCAN_SETTINGS: typing.Final = structs.SettingsFromUser(optimize_input=False)
 LARGE_PAGE_THRESHOLD_BYTES: typing.Final = 100_000
 EXPECTED_CORPUS_SIZE: typing.Final = 100
-EXPECTED_LANGUAGES_COUNT: typing.Final = 15
-EXPECTED_ARCHETYPES_COUNT: typing.Final = 10
-EXPECTED_QUIRKS_COUNT: typing.Final = 20
-EXPECTED_ENCODINGS_COUNT: typing.Final = 5
-EXPECTED_LARGE_PAGES_COUNT: typing.Final = 10
-FULL_SCAN_SETTINGS: typing.Final = structs.SettingsFromUser(optimize_input=False)
-
-
-def _assert_matches_expectations(
-    parse_result: structs.TagsGroup,
-    snippet_result: structs.SnippetGroup,
-    *,
-    expected_group: typing.Mapping[str, typing.Any],
-) -> None:
-    assert parse_result.title == expected_group["title"]
-    assert corpus_support.convert_meta_tags_to_pairs(parse_result.basic) == expected_group["basic"]
-    assert corpus_support.convert_meta_tags_to_pairs(parse_result.open_graph) == expected_group["open_graph"]
-    assert corpus_support.convert_meta_tags_to_pairs(parse_result.twitter) == expected_group["twitter"]
-    assert corpus_support.convert_meta_tags_to_pairs(parse_result.other) == expected_group["other"]
-    assert snippet_result.open_graph == structs.SocialMediaSnippet(**expected_group["snippet_open_graph"])
-    assert snippet_result.twitter == structs.SocialMediaSnippet(**expected_group["snippet_twitter"])
+EXPECTED_SITES_COUNT: typing.Final = 90
+EXPECTED_LANGUAGES_COUNT: typing.Final = 25
+EXPECTED_WRITING_SYSTEMS_COUNT: typing.Final = 10
+EXPECTED_LEGACY_ENCODED_COUNT: typing.Final = 5
+EXPECTED_LARGE_PAGES_COUNT: typing.Final = 40
+LEGACY_ENCODING_NAMES: typing.Final[frozenset[str]] = frozenset(
+    ("iso-8859-1", "iso-8859-2", "iso-8859-15", "windows-1250", "windows-1251", "windows-1252", "euc-kr", "gb2312")
+)
 
 
 @pytest.mark.parametrize("one_corpus_page", corpus_support.ALL_CORPUS_PAGES, ids=corpus_support.CORPUS_PAGE_IDENTIFIERS)
-def test_corpus_page_with_default_settings(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
+def test_real_page_matches_the_reference_parser(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
     page_bytes: typing.Final[bytes] = one_corpus_page.read_page_bytes()
-
-    _assert_matches_expectations(
-        parse_meta_tags_from_source(page_bytes),
-        parse_snippets_from_source(page_bytes),
-        expected_group=one_corpus_page.expected_default,
+    expected_result: typing.Final[reference_parser.ReferenceResult] = reference_parser.extract_reference_tags(
+        convert_source_to_text(page_bytes)
     )
 
+    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(page_bytes)
+
+    assert parse_result.title == expected_result.page_title
+    assert corpus_support.convert_meta_tags_to_pairs(parse_result.open_graph) == expected_result.open_graph_tags
+    assert corpus_support.convert_meta_tags_to_pairs(parse_result.twitter) == expected_result.twitter_tags
+    assert corpus_support.convert_meta_tags_to_pairs(parse_result.basic) == expected_result.basic_tags
+    assert corpus_support.convert_meta_tags_to_pairs(parse_result.other) == expected_result.other_tags
+
 
 @pytest.mark.parametrize("one_corpus_page", corpus_support.ALL_CORPUS_PAGES, ids=corpus_support.CORPUS_PAGE_IDENTIFIERS)
-def test_corpus_page_without_input_optimization(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
+def test_full_scan_starts_with_the_head_tags(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
+    """Scanning the whole document may add tags placed in the body, never reorder or drop head ones."""
     page_bytes: typing.Final[bytes] = one_corpus_page.read_page_bytes()
-
-    _assert_matches_expectations(
-        parse_meta_tags_from_source(page_bytes, options=FULL_SCAN_SETTINGS),
-        parse_snippets_from_source(page_bytes, options=FULL_SCAN_SETTINGS),
-        expected_group=one_corpus_page.expected_full,
+    expected_result: typing.Final[reference_parser.ReferenceResult] = reference_parser.extract_reference_tags(
+        convert_source_to_text(page_bytes)
     )
 
+    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(page_bytes, options=FULL_SCAN_SETTINGS)
+
+    for parsed_group, expected_group in (
+        (parse_result.open_graph, expected_result.open_graph_tags),
+        (parse_result.twitter, expected_result.twitter_tags),
+        (parse_result.other, expected_result.other_tags),
+    ):
+        assert corpus_support.convert_meta_tags_to_pairs(parsed_group)[: len(expected_group)] == expected_group
+
 
 @pytest.mark.parametrize("one_corpus_page", corpus_support.ALL_CORPUS_PAGES, ids=corpus_support.CORPUS_PAGE_IDENTIFIERS)
-def test_corpus_page_invariants(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
+def test_real_page_snippets_take_the_first_value(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
+    page_bytes: typing.Final[bytes] = one_corpus_page.read_page_bytes()
+    expected_result: typing.Final[reference_parser.ReferenceResult] = reference_parser.extract_reference_tags(
+        convert_source_to_text(page_bytes)
+    )
+
+    snippet_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(page_bytes)
+
+    for expected_pairs, one_snippet in (
+        (expected_result.open_graph_tags, snippet_result.open_graph),
+        (expected_result.twitter_tags, snippet_result.twitter),
+    ):
+        for one_field_name in ("title", "description", "image", "url"):
+            first_values = [
+                one_value for one_name, one_value in expected_pairs if one_name.replace(":", "_") == one_field_name
+            ]
+            assert getattr(one_snippet, one_field_name) == (first_values[0] if first_values else "")
+
+
+@pytest.mark.parametrize("one_corpus_page", corpus_support.ALL_CORPUS_PAGES, ids=corpus_support.CORPUS_PAGE_IDENTIFIERS)
+def test_real_page_invariants(one_corpus_page: corpus_support.CorpusPageInfo) -> None:
     parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(one_corpus_page.read_page_bytes())
 
     assert parse_result.title == parse_result.title.strip()
@@ -73,15 +95,30 @@ def test_corpus_page_invariants(one_corpus_page: corpus_support.CorpusPageInfo) 
     assert {one_meta_tag.name for one_meta_tag in parse_result.basic} <= set(structs.BASIC_META_TAGS)
 
 
-def test_corpus_covers_the_interesting_shapes() -> None:
+def test_corpus_covers_many_sites_languages_and_encodings() -> None:
     all_pages: typing.Final[tuple[corpus_support.CorpusPageInfo, ...]] = corpus_support.ALL_CORPUS_PAGES
+    legacy_encoded_pages: typing.Final[list[corpus_support.CorpusPageInfo]] = [
+        one_page for one_page in all_pages if one_page.declared_charset in LEGACY_ENCODING_NAMES
+    ]
     large_pages: typing.Final[list[corpus_support.CorpusPageInfo]] = [
         one_page for one_page in all_pages if one_page.raw_size_bytes > LARGE_PAGE_THRESHOLD_BYTES
     ]
 
     assert len(all_pages) == EXPECTED_CORPUS_SIZE
-    assert len({one_page.language for one_page in all_pages}) >= EXPECTED_LANGUAGES_COUNT
-    assert len({one_page.archetype for one_page in all_pages}) >= EXPECTED_ARCHETYPES_COUNT
-    assert len({one_page.quirk_name for one_page in all_pages}) >= EXPECTED_QUIRKS_COUNT
-    assert len({one_page.encoding for one_page in all_pages}) >= EXPECTED_ENCODINGS_COUNT
+    assert len({one_page.site_domain for one_page in all_pages}) >= EXPECTED_SITES_COUNT
+    assert len({one_page.language for one_page in all_pages if one_page.language}) >= EXPECTED_LANGUAGES_COUNT
+    assert len({one_page.writing_system for one_page in all_pages}) >= EXPECTED_WRITING_SYSTEMS_COUNT
+    assert len(legacy_encoded_pages) >= EXPECTED_LEGACY_ENCODED_COUNT
     assert len(large_pages) >= EXPECTED_LARGE_PAGES_COUNT
+
+
+def test_every_corpus_page_records_its_origin() -> None:
+    stored_files: typing.Final[set[str]] = {
+        one_path.name for one_path in corpus_support.CORPUS_DIRECTORY.glob("*.html.gz")
+    }
+
+    assert stored_files == {one_page.file_name for one_page in corpus_support.ALL_CORPUS_PAGES}
+    for one_page in corpus_support.ALL_CORPUS_PAGES:
+        assert one_page.site_domain, "every page must name the site it was captured from"
+        assert one_page.page_url.startswith("http"), "every page must record its original address"
+        assert one_page.captured_by, "every page must name the corpus it was taken from"

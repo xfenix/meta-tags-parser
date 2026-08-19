@@ -16,8 +16,6 @@ basic, other) and the page title out of HTML, and builds social-media snippet pr
 - `meta_tags_parser/__init__.py` — the public export surface.
 - `benchmark/` — standalone speed benchmark, excluded from linting (large embedded payload).
 - `scripts/generate_coverage_badge.py` — CI helper, generates the coverage badge JSON.
-- `scripts/generate_html_corpus.py` + `scripts/corpus_locales.py` — generator of the real-world HTML
-  test corpus (see the Tests section).
 
 ## Supported Python versions
 
@@ -98,8 +96,9 @@ the maintainer, not silently by an agent.
     `_parse_dimension`, the structs).
   - `tests/integration/` — everything that goes through the public API: parsing semantics, settings,
     snippets, malformed markup, the download helpers (mocked with `httpx.MockTransport`, never the
-    network), the four captured real pages and the generated real-world corpus.
+    network), the four captured real pages and the corpus of pages from real sites.
   - `tests/conftest.py` holds shared fixtures; `tests/corpus_support.py` reads the corpus manifest;
+    `tests/reference_parser.py` is the independent oracle used by the corpus tests;
     `tests/factories.py` holds the polyfactory factories.
 - Randomness is seeded (`faker_seed`, `SHARED_RANDOM_SOURCE`, hypothesis `deadline=None`), a failing
   test must be replayable.
@@ -107,27 +106,31 @@ the maintainer, not silently by an agent.
   (asserts, non-crypto random, private access and multilingual literals are all expected here).
 - Keep coverage at 100% for everything reachable without network access, tests included.
 
-### Real-world HTML corpus
+### Corpus of pages from real sites
 
-`tests/html_corpus/` holds 100 generated pages (~7.5 MB raw, stored gzipped) that imitate real sites:
-10 archetypes (news, shop, video, WordPress blog, docs, SPA, forum, landing, government portal, media
-gallery) across 15 languages (ru, uk, en, de, fr, es, pt-BR, it, pl, tr, ja, zh, ko, ar, he) with 20
-markup quirks (uppercase tags, single/unquoted attributes, duplicated Open Graph tags, meta after the
-head, legacy charsets, byte order marks, emoji, entity escapes, multi character lowercasing, ...).
+`tests/html_corpus/` holds 100 pages captured from 100 different real sites, stored gzipped as the
+exact bytes the site served (20.4 MB raw, 5.7 MB in the repository). It covers 31 languages and 15
+writing systems (Cyrillic, Arabic, CJK, Hangul, Devanagari, Armenian, Georgian, Greek, Thai, Bengali,
+Gujarati, ...), pages from 20 KB to 3.4 MB, and pages served in legacy encodings (windows-1250/1251/1252,
+iso-8859-1/2/15, euc-kr) next to utf-8 ones.
 
-`tests/html_corpus/expectations.json` is the manifest: for each page it stores the tags that were
-written into the markup, so the tests compare against ground truth rather than against a snapshot of
-parser output. `expected_default` is what the default settings must return, `expected_full` is what
-`optimize_input=False` must return.
+`tests/html_corpus/pages.json` records the provenance of every page: the site, the original URL, the
+declared charset, the raw sha256, and the public corpus the capture was taken from (mozilla/readability,
+adbar/trafilatura, adbar/htmldate, scrapinghub/article-extraction-benchmark, codelucas/newspaper,
+goose3/goose3, microlinkhq/metascraper) with the commit it was taken at. Those upstream projects are
+the ones that captured the pages; keep the provenance intact when touching the corpus.
 
-Regenerate (deterministic, byte identical between runs) after touching the generator:
+Expectations are **not** snapshots of parser output. `tests/reference_parser.py` is an independent
+implementation of the documented rules built on the standard library's `html.parser`, and
+`tests/integration/test_real_world_corpus.py` requires the package and the reference to agree on every
+page. A snapshot cannot catch a regression that also rewrites the snapshot; two independent
+implementations can. The reference parser has its own unit tests in `tests/unit/test_reference_parser.py`.
 
-```bash
-uv run python -m scripts.generate_html_corpus
-```
+Adding pages: drop the captured bytes in as `<site>.html.gz` and add the matching row to `pages.json`
+(the test suite verifies that the directory listing and the manifest match exactly).
 
-Real captured pages live in `tests/html_fixtures/` and have hand written expectations in
-`tests/integration/test_captured_pages.py`; add new ones there when a real site exposes a new shape.
+Real pages captured earlier live in `tests/html_fixtures/` and have hand written expectations in
+`tests/integration/test_captured_pages.py`.
 
 ## Git / PR hygiene
 

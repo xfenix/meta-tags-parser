@@ -1,8 +1,8 @@
-"""Access helpers for the generated real-world HTML corpus.
+"""Access helpers for the corpus of pages captured from real sites.
 
-The corpus itself is built by ``scripts/generate_html_corpus.py``; here we only read the manifest and
-unpack pages on demand. Everything is module level so that tests can parametrize over the corpus at
-collection time.
+The pages live in ``tests/html_corpus`` as gzipped copies of the exact bytes the site served, and
+``pages.json`` records where each one came from. Everything is module level so that tests can
+parametrize over the corpus at collection time.
 """
 
 import dataclasses
@@ -14,23 +14,23 @@ import typing
 
 
 CORPUS_DIRECTORY: typing.Final = pathlib.Path(__file__).parent / "html_corpus"
-EXPECTATIONS_PATH: typing.Final = CORPUS_DIRECTORY / "expectations.json"
+MANIFEST_PATH: typing.Final = CORPUS_DIRECTORY / "pages.json"
 
 
 @typing.final
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class CorpusPageInfo:
-    """One corpus page: where it lives and what the parser is expected to return for it."""
+    """One captured page: which site it came from and where the capture is stored."""
 
     page_slug: str
     file_name: str
+    site_domain: str
+    page_url: str
     language: str
-    archetype: str
-    quirk_name: str
-    encoding: str
+    writing_system: str
+    declared_charset: str
     raw_size_bytes: int
-    expected_default: typing.Mapping[str, typing.Any]
-    expected_full: typing.Mapping[str, typing.Any]
+    captured_by: str
 
     def read_page_bytes(self) -> bytes:
         return gzip.decompress(CORPUS_DIRECTORY.joinpath(self.file_name).read_bytes())
@@ -38,20 +38,18 @@ class CorpusPageInfo:
 
 @functools.lru_cache(maxsize=1)
 def load_corpus_pages() -> tuple[CorpusPageInfo, ...]:
-    manifest_data: typing.Final[typing.Mapping[str, typing.Any]] = json.loads(
-        EXPECTATIONS_PATH.read_text(encoding="utf-8")
-    )
+    manifest_data: typing.Final[typing.Mapping[str, typing.Any]] = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     return tuple(
         CorpusPageInfo(
             page_slug=one_page["slug"],
             file_name=one_page["file_name"],
+            site_domain=one_page["site"],
+            page_url=one_page["page_url"],
             language=one_page["language"],
-            archetype=one_page["archetype"],
-            quirk_name=one_page["quirk"],
-            encoding=one_page["encoding"],
+            writing_system=one_page["writing_system"],
+            declared_charset=one_page["declared_charset"],
             raw_size_bytes=one_page["raw_size_bytes"],
-            expected_default=one_page["expected_default"],
-            expected_full=one_page["expected_full"],
+            captured_by=one_page["captured_by"],
         )
         for one_page in manifest_data["pages"]
     )
@@ -62,5 +60,5 @@ CORPUS_PAGE_IDENTIFIERS: typing.Final[tuple[str, ...]] = tuple(one_page.page_slu
 
 
 def convert_meta_tags_to_pairs(parsed_tags: typing.Iterable[typing.Any]) -> list[list[str]]:
-    """Turn parsed OneMetaTag objects into the [name, value] pairs the manifest stores."""
+    """Turn parsed OneMetaTag objects into the [name, value] pairs the reference parser returns."""
     return [[one_meta_tag.name, one_meta_tag.value] for one_meta_tag in parsed_tags]
