@@ -31,7 +31,7 @@ Package manager is **uv**. Do not use bare `pip`/`venv`.
 
 ```bash
 uv sync --dev                                    # install deps (dev group included)
-uv run pytest -n2 .                              # run tests (parallel, with coverage)
+uv run pytest                                    # run tests (parallel via -n auto, with coverage)
 uv run ruff format .                             # format
 uv run ruff check --no-fix .                     # lint (ruff, select = ALL)
 uv run flake8 meta_tags_parser scripts tests     # lint (community-of-python plugin, COP rules)
@@ -88,11 +88,49 @@ the maintainer, not silently by an agent.
 
 ## Tests
 
-- `pytest` + `pytest-xdist` (parallel) + `hypothesis` (property-based) + `faker` (fixture data).
+- `pytest` + `pytest-xdist` (`-n auto` is in `addopts`, always run parallel) + `hypothesis`
+  (property-based) + `faker` and `polyfactory` (generated data).
 - Arrange/Act/Assert; prefer parametrized tests over copy-pasted near-duplicates.
-- `tests/*.py` gets `S101`/`S311` ruff exemptions (asserts and non-crypto random are fine in tests).
-- Keep coverage at 100% for anything reachable without network access; `parse.py`'s `hard_limit_chars`
-  branch is a known, pre-existing minor gap (not something to chase in unrelated changes).
+- Layout follows the testing diamond — a thin layer of unit tests, the bulk in integration:
+  - `tests/unit/` — narrow checks of internals (`_extract_html_scan_window`, `convert_source_to_text`,
+    `_parse_dimension`, the structs).
+  - `tests/integration/` — everything that goes through the public API: parsing semantics, settings,
+    snippets, malformed markup, the download helpers (mocked with `httpx.MockTransport`, never the
+    network), the four captured real pages and the corpus of pages from real sites.
+  - `tests/conftest.py` holds shared fixtures; `tests/corpus_support.py` reads the corpus manifest;
+    `tests/reference_parser.py` is the independent oracle used by the corpus tests;
+    `tests/factories.py` holds the polyfactory factories.
+- Randomness is seeded (`faker_seed`, `SHARED_RANDOM_SOURCE`, hypothesis `deadline=None`), a failing
+  test must be replayable.
+- `tests/**.py` gets `S101`/`S311`/`SLF001`/`PLR2004` and the `RUF001`-family ruff exemptions
+  (asserts, non-crypto random, private access and multilingual literals are all expected here).
+- Keep coverage at 100% for everything reachable without network access, tests included.
+
+### Corpus of pages from real sites
+
+`tests/html_corpus/` holds 100 pages captured from 100 different real sites, stored gzipped as the
+exact bytes the site served (20.4 MB raw, 5.7 MB in the repository). It covers 31 languages and 15
+writing systems (Cyrillic, Arabic, CJK, Hangul, Devanagari, Armenian, Georgian, Greek, Thai, Bengali,
+Gujarati, ...), pages from 20 KB to 3.4 MB, and pages served in legacy encodings (windows-1250/1251/1252,
+iso-8859-1/2/15, euc-kr) next to utf-8 ones.
+
+`tests/html_corpus/pages.json` records the provenance of every page: the site, the original URL, the
+declared charset, the raw sha256, and the public corpus the capture was taken from (mozilla/readability,
+adbar/trafilatura, adbar/htmldate, scrapinghub/article-extraction-benchmark, codelucas/newspaper,
+goose3/goose3, microlinkhq/metascraper) with the commit it was taken at. Those upstream projects are
+the ones that captured the pages; keep the provenance intact when touching the corpus.
+
+Expectations are **not** snapshots of parser output. `tests/reference_parser.py` is an independent
+implementation of the documented rules built on the standard library's `html.parser`, and
+`tests/integration/test_real_world_corpus.py` requires the package and the reference to agree on every
+page. A snapshot cannot catch a regression that also rewrites the snapshot; two independent
+implementations can. The reference parser has its own unit tests in `tests/unit/test_reference_parser.py`.
+
+Adding pages: drop the captured bytes in as `<site>.html.gz` and add the matching row to `pages.json`
+(the test suite verifies that the directory listing and the manifest match exactly).
+
+Real pages captured earlier live in `tests/html_fixtures/` and have hand written expectations in
+`tests/integration/test_captured_pages.py`.
 
 ## Git / PR hygiene
 

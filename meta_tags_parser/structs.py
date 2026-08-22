@@ -5,7 +5,11 @@ import types
 import typing
 
 
-@functools.cache
+TAG_NAME_CACHE_SIZE: typing.Final = 4096
+
+
+# tag names come from arbitrary web pages, so the cache has to be bounded
+@functools.lru_cache(maxsize=TAG_NAME_CACHE_SIZE)
 def _transform_tag_name(tag_name: str) -> str:
     return tag_name.replace(":", "_")
 
@@ -94,6 +98,7 @@ class SettingsFromUser:
 
 DEFAULT_SETTINGS_FROM_USER: typing.Final = SettingsFromUser()
 WHAT_ATTRS_IN_SOCIAL_MEDIA_SNIPPET: typing.Final = SocialMediaSnippet.__dataclass_fields__.keys()
+DIMENSION_SNIPPET_FIELDS: typing.Final[frozenset[str]] = frozenset(("image_width", "image_height"))
 BASIC_META_TAGS: typing.Final[tuple[str, ...]] = (
     "title",
     "description",

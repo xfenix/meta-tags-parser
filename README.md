@@ -216,6 +216,23 @@ result: structs.TagsGroup = parse_meta_tags_from_source(
 
 Reducing this tuple of parsing requirements may increase overall parsing speed.
 
+
+## Behaviour details
+
+* **Bytes input.** `parse_meta_tags_from_source` and `parse_snippets_from_source` accept `bytes` as well as `str`.
+  Bytes are decoded using the byte order mark, or the charset declared by `<meta charset=...>` /
+  `<meta http-equiv="content-type" ...>`, falling back to UTF-8. This matters for legacy pages
+  served as windows-1251, shift_jis, gbk and friends.
+* **Repeated tags.** `TagsGroup` keeps every repeated `og:`/`twitter:` tag in document order, because
+  Open Graph allows lists (several `og:image` entries, for example). Snippets take the *first*
+  occurrence of each field, which is what social networks treat as the primary value. Repeated basic
+  tags (`description`, `keywords`, ...) are collapsed to their first occurrence.
+* **Global settings.** `set_settings_for_meta_tags` is honoured by every entry point, including
+  `parse_snippets_from_source` and the `*_from_url` helpers. Options passed explicitly always win.
+* **Downloads.** The `*_from_url` helpers follow redirects, send a library user agent and use a
+  10 second timeout by default (`meta_tags_parser.download.DEFAULT_REQUEST_TIMEOUT`, overridable via
+  the `request_timeout` argument of `download_page_sync` / `download_page_async`).
+
 ## Important notes
 * Any name in a meta tag (name or property attribute) is lowercased
 * `og:` and `twitter:` prefixes are stripped from the original attributes, and the dataclass structures carry this information.
