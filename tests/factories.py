@@ -25,18 +25,6 @@ KNOWN_BOUNDARY_TAG_PAIRS: typing.Final[tuple[tuple[str, str], ...]] = (
 
 
 @typing.final
-class OneMetaTagFactory(dataclass_factory.DataclassFactory[structs.OneMetaTag]):
-    """Build arbitrary meta tags with names that look like the ones sites really ship."""
-
-    __model__ = structs.OneMetaTag
-    __random__ = SHARED_RANDOM_SOURCE
-
-    @classmethod
-    def name(cls) -> str:  # noqa: COP009, COP007
-        return cls.__random__.choice(("title", "description", "image", "image:width", "image:height", "url", "audio"))
-
-
-@typing.final
 class SettingsFromUserFactory(dataclass_factory.DataclassFactory[structs.SettingsFromUser]):
     """Build settings objects covering every combination of what_to_parse and slicing limits."""
 
