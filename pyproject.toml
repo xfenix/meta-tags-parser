@@ -83,7 +83,7 @@ lines-after-imports = 2
 [tool.ruff.lint.extend-per-file-ignores]
 # RUF001/RUF002/RUF003 flag non latin characters as ambiguous, but multilingual page content is
 # exactly what this parser exists for, so it is expected inside fixtures, corpus data and expectations
-"tests/**.py" = ["S101", "S311", "SLF001", "PLR2004", "RUF001", "RUF002", "RUF003"]
+"tests/**.py" = ["S101", "S311", "PLR2004", "RUF001", "RUF002", "RUF003"]
 "scripts/corpus_locales.py" = ["RUF001", "RUF002", "RUF003"]
 "scripts/generate_html_corpus.py" = ["S311", "RUF001", "RUF002", "RUF003"]
 
