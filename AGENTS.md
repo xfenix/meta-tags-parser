@@ -91,19 +91,26 @@ the maintainer, not silently by an agent.
 - `pytest` + `pytest-xdist` (`-n auto` is in `addopts`, always run parallel) + `hypothesis`
   (property-based) + `faker` and `polyfactory` (generated data).
 - Arrange/Act/Assert; prefer parametrized tests over copy-pasted near-duplicates.
-- Layout follows the testing diamond — a thin layer of unit tests, the bulk in integration:
-  - `tests/unit/` — narrow checks of internals (`_extract_html_scan_window`, `convert_source_to_text`,
-    `_parse_dimension`, the structs).
-  - `tests/integration/` — everything that goes through the public API: parsing semantics, settings,
-    snippets, malformed markup, the download helpers (mocked with `httpx.MockTransport`, never the
-    network), the four captured real pages and the corpus of pages from real sites.
+- **Integration only — there is no unit test layer.** Every test goes through the public API
+  (`parse_meta_tags_from_source`, `parse_snippets_from_source`, `set_settings_for_meta_tags`, the
+  `parse_*_from_url` helpers), never through an underscore-prefixed function. Internals are covered by
+  the observable behaviour they produce: the scan window through `SettingsFromUser` limits and boundary
+  tags (`tests/test_parse_settings.py`), decoding through pages passed in as bytes
+  (`tests/test_source_encodings.py`), dimension parsing through `SnippetGroup.image_width`
+  (`tests/test_snippets.py`). When a new internal needs coverage, find the public knob that reaches it
+  instead of importing it.
+  - `tests/test_*.py` — parsing semantics, settings, snippets, malformed markup, encodings, the
+    download helpers (mocked with `httpx.MockTransport`, never the network), the four captured real
+    pages and the corpus of pages from real sites.
   - `tests/conftest.py` holds shared fixtures; `tests/corpus_support.py` reads the corpus manifest;
     `tests/reference_parser.py` is the independent oracle used by the corpus tests;
     `tests/factories.py` holds the polyfactory factories.
 - Randomness is seeded (`faker_seed`, `SHARED_RANDOM_SOURCE`, hypothesis `deadline=None`), a failing
   test must be replayable.
-- `tests/**.py` gets `S101`/`S311`/`SLF001`/`PLR2004` and the `RUF001`-family ruff exemptions
-  (asserts, non-crypto random, private access and multilingual literals are all expected here).
+- `tests/**.py` gets `S101`/`S311`/`PLR2004` and the `RUF001`-family ruff exemptions (asserts,
+  non-crypto random, inline expected numbers and multilingual literals are all expected here).
+  `SLF001` is deliberately **not** exempted: reaching into a private function from a test is a lint
+  error, which is what keeps the suite on the public API.
 - Keep coverage at 100% for everything reachable without network access, tests included.
 
 ### Corpus of pages from real sites
@@ -122,15 +129,17 @@ the ones that captured the pages; keep the provenance intact when touching the c
 
 Expectations are **not** snapshots of parser output. `tests/reference_parser.py` is an independent
 implementation of the documented rules built on the standard library's `html.parser`, and
-`tests/integration/test_real_world_corpus.py` requires the package and the reference to agree on every
-page. A snapshot cannot catch a regression that also rewrites the snapshot; two independent
-implementations can. The reference parser has its own unit tests in `tests/unit/test_reference_parser.py`.
+`tests/test_real_world_corpus.py` requires the package and the reference to agree on every page. A
+snapshot cannot catch a regression that also rewrites the snapshot; two independent implementations
+can. The same file pins the oracle itself: `test_package_and_reference_agree_on_the_documented_rules`
+and `test_package_and_reference_stop_at_the_body_start_tag` check both implementations against hand
+written expectations, so the two cannot drift into agreeing on the wrong answer.
 
 Adding pages: drop the captured bytes in as `<site>.html.gz` and add the matching row to `pages.json`
 (the test suite verifies that the directory listing and the manifest match exactly).
 
 Real pages captured earlier live in `tests/html_fixtures/` and have hand written expectations in
-`tests/integration/test_captured_pages.py`.
+`tests/test_captured_pages.py`.
 
 ## Git / PR hygiene
 

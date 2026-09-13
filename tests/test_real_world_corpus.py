@@ -5,6 +5,7 @@ an independent implementation of the same documented rules built on the standard
 selectolax. If the two disagree on a real page, one of them has a bug.
 """
 
+import types
 import typing
 
 import pytest
@@ -25,6 +26,63 @@ EXPECTED_LARGE_PAGES_COUNT: typing.Final = 40
 LEGACY_ENCODING_NAMES: typing.Final[frozenset[str]] = frozenset(
     ("iso-8859-1", "iso-8859-2", "iso-8859-15", "windows-1250", "windows-1251", "windows-1252", "euc-kr", "gb2312")
 )
+DOCUMENTED_RULES_PAGE_FIXTURE: typing.Final = (
+    "<html><head>"
+    "<title>  padded &amp; escaped  </title>"
+    '<meta property="og:title" content="og value">'
+    '<meta property="og:description" content="first\r\nsecond">'
+    '<meta name="twitter:card" content="summary">'
+    '<meta property="twitter:title" content="twitter via property">'
+    '<meta name="description" content="first description">'
+    '<meta name="description" content="second description">'
+    '<meta name="generator" content="hand made">'
+    '<meta name="og:audio" content="og via name">'
+    '<meta name="image" property="og:image" content="both attributes">'
+    '<meta name="empty" content="">'
+    "</head>"
+    '<meta property="og:title" content="after the head">'
+    '<body><meta property="og:title" content="inside the body">'
+)
+UNCLOSED_HEAD_PAGE_FIXTURE: typing.Final = (
+    "<html><head><title>Head title</title>"
+    '<meta property="og:title" content="in the head">'
+    '<body><meta property="og:title" content="in the body">'
+)
+EXPECTED_DOCUMENTED_TITLE: typing.Final = "padded & escaped"
+EXPECTED_DOCUMENTED_TAGS: typing.Final[typing.Mapping[str, list[list[str]]]] = types.MappingProxyType(
+    {
+        "open_graph": [["title", "og value"], ["description", "first\nsecond"], ["image", "both attributes"]],
+        "twitter": [["card", "summary"], ["title", "twitter via property"]],
+        "basic": [["description", "first description"]],
+        "other": [["generator", "hand made"], ["og:audio", "og via name"]],
+    }
+)
+
+
+def test_package_and_reference_agree_on_the_documented_rules() -> None:
+    """The oracle is only worth its name while it independently reproduces the rules on a known page."""
+    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(DOCUMENTED_RULES_PAGE_FIXTURE)
+    reference_result: typing.Final[reference_parser.ReferenceResult] = reference_parser.extract_reference_tags(
+        DOCUMENTED_RULES_PAGE_FIXTURE
+    )
+
+    assert parse_result.title == EXPECTED_DOCUMENTED_TITLE
+    assert reference_result.page_title == EXPECTED_DOCUMENTED_TITLE
+    for one_field_name, expected_pairs in EXPECTED_DOCUMENTED_TAGS.items():
+        assert corpus_support.convert_meta_tags_to_pairs(getattr(parse_result, one_field_name)) == expected_pairs
+        assert getattr(reference_result, f"{one_field_name}_tags") == expected_pairs
+
+
+def test_package_and_reference_stop_at_the_body_start_tag() -> None:
+    """Plenty of pages never close their head, both implementations then stop at the opening body tag."""
+    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(UNCLOSED_HEAD_PAGE_FIXTURE)
+    reference_result: typing.Final[reference_parser.ReferenceResult] = reference_parser.extract_reference_tags(
+        UNCLOSED_HEAD_PAGE_FIXTURE
+    )
+
+    assert parse_result.title == reference_result.page_title == "Head title"
+    assert corpus_support.convert_meta_tags_to_pairs(parse_result.open_graph) == [["title", "in the head"]]
+    assert reference_result.open_graph_tags == [["title", "in the head"]]
 
 
 @pytest.mark.parametrize("one_corpus_page", corpus_support.ALL_CORPUS_PAGES, ids=corpus_support.CORPUS_PAGE_IDENTIFIERS)

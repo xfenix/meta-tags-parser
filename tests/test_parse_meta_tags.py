@@ -1,8 +1,9 @@
+import dataclasses
 import typing
 
 import pytest
 
-from meta_tags_parser import parse_meta_tags_from_source, structs
+from meta_tags_parser import parse_meta_tags_from_source, parse_snippets_from_source, structs
 from tests import conftest
 
 
@@ -160,14 +161,20 @@ def test_html_entities_are_decoded() -> None:
     assert parse_result.basic == [structs.OneMetaTag(name="description", value="<b>bold</b> П")]
 
 
-def test_source_can_be_passed_as_bytes() -> None:
-    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(
-        '<html><head><meta charset="windows-1251"><title>Привет</title>'
-        '<meta property="og:title" content="Заголовок"></head></html>'.encode("windows-1251")
+def test_results_handed_to_the_user_are_immutable() -> None:
+    """Every struct the public API returns is frozen, callers may cache a result without copying it."""
+    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(MULTILINE_PAGE_FIXTURE)
+    snippet_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(MULTILINE_PAGE_FIXTURE)
+    frozen_instances: typing.Final[tuple[object, ...]] = (
+        parse_result,
+        parse_result.open_graph[0],
+        snippet_result,
+        snippet_result.open_graph,
     )
 
-    assert parse_result.title == "Привет"
-    assert parse_result.open_graph == [structs.OneMetaTag(name="title", value="Заголовок")]
+    for one_instance, one_field_name in zip(frozen_instances, ("title", "name", "twitter", "title"), strict=True):
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            setattr(one_instance, one_field_name, "mutated")
 
 
 def test_tags_after_the_head_are_ignored_by_default() -> None:

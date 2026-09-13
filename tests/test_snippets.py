@@ -43,6 +43,9 @@ EXPECTED_SNIPPET_GROUP: typing.Final = structs.SnippetGroup(
     ),
 )
 REPEATED_PARSE_COUNT: typing.Final = 3
+MAX_GENERATED_DIMENSION: typing.Final = 100_000
+UNICODE_DIGITS: typing.Final = st.characters(whitelist_categories=["Nd"])
+SAFE_ATTRIBUTE_ALPHABET: typing.Final = st.characters(blacklist_categories=("Cc", "Cs"), blacklist_characters='<>"&')
 
 
 @pytest.mark.parametrize("_repeat_number", range(REPEATED_PARSE_COUNT))
@@ -96,7 +99,20 @@ def test_snippets_accept_bytes() -> None:
 
 @pytest.mark.parametrize(
     ("dimension_text", "expected_width"),
-    [("", 0), ("123", 123), ("abc", 0), ("٥", 0), ("²", 0), ("  55  ", 55)],
+    [
+        ("", 0),
+        ("   ", 0),
+        ("123", 123),
+        ("  55  ", 55),
+        ("0", 0),
+        ("abc", 0),
+        ("12.5", 0),
+        ("-12", 0),
+        ("1200px", 0),
+        ("١٢٣", 0),
+        ("٥", 0),
+        ("²", 0),
+    ],
 )
 def test_image_width_examples(dimension_text: str, expected_width: int) -> None:
     snippet_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(
@@ -106,12 +122,28 @@ def test_image_width_examples(dimension_text: str, expected_width: int) -> None:
     assert snippet_result.twitter.image_width == expected_width
 
 
-@hypothesis.settings(max_examples=50)
 @hypothesis.given(
-    snippet_title=st.text(
-        alphabet=st.characters(blacklist_categories=("Cc", "Cs"), blacklist_characters='<>"&'), max_size=80
+    dimension_text=st.one_of(
+        st.integers(min_value=0, max_value=MAX_GENERATED_DIMENSION).map(str),
+        st.text(alphabet=UNICODE_DIGITS, min_size=1, max_size=8),
+        st.text(alphabet=SAFE_ATTRIBUTE_ALPHABET, max_size=8),
     )
 )
+def test_image_dimensions_follow_the_ascii_digit_rule(dimension_text: str) -> None:
+    """Anything that is not a plain ascii number (unicode digits, units, decimals) becomes a zero."""
+    cleaned_text: typing.Final[str] = dimension_text.strip()
+
+    snippet_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(
+        f'<meta property="og:image:width" content="{dimension_text}">'
+    )
+
+    assert snippet_result.open_graph.image_width == (
+        int(cleaned_text) if cleaned_text.isascii() and cleaned_text.isdigit() else 0
+    )
+
+
+@hypothesis.settings(max_examples=50)
+@hypothesis.given(snippet_title=st.text(alphabet=SAFE_ATTRIBUTE_ALPHABET, max_size=80))
 def test_any_title_survives_the_round_trip(snippet_title: str) -> None:
     snippet_result: typing.Final[structs.SnippetGroup] = parse_snippets_from_source(
         f'<meta property="og:title" content="{snippet_title}">'

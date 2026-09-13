@@ -75,12 +75,3 @@ def test_arbitrary_text_is_parsed_without_errors(page_fixture: str) -> None:
     for one_meta_tag in (*parse_result.basic, *parse_result.open_graph, *parse_result.twitter, *parse_result.other):
         assert one_meta_tag.value
         assert one_meta_tag.name == one_meta_tag.name.strip()
-
-
-@pytest.mark.parametrize("declared_charset", ["base64", "hex", "zip", "idna", "unknown-charset"])
-def test_bytes_with_unusable_declared_charset_are_still_parsed(declared_charset: str) -> None:
-    parse_result: typing.Final[structs.TagsGroup] = parse_meta_tags_from_source(
-        f'<html><head><meta charset="{declared_charset}"><title>Still here</title></head></html>'.encode()
-    )
-
-    assert parse_result.title == "Still here"
