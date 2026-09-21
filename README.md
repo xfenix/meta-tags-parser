@@ -1,3 +1,5 @@
+
+
 # Meta tags parser
 
 [![Test, lint, publish](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/xfenix/meta-tags-parser/actions/workflows/main.yml)
@@ -12,7 +14,7 @@ If you want to see what social media snippets look like, check the example:
 ![](https://raw.githubusercontent.com/xfenix/meta-tags-parser/master/social-media-snippets.png)
 
 ## Requirements
-* Python 3.10+
+* Python 3.10–3.14
 * [HTTPX](https://www.python-httpx.org/)
 * [selectolax](https://github.com/rushter/selectolax)
 
